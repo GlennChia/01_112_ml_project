@@ -12,7 +12,13 @@ def read_to_pdf(file_path):
     return df
 
 
+def estimate_emission_parameters(word, tag, df):
+    count_x_given_y = df[df['tags']==tag].words.str.count(word).sum()
+    count_y = df.tags.str.count(tag).sum()
+    return count_x_given_y/count_y
+
+
 if __name__=="__main__":
     '''Part 2 Qn 1: Test MLE'''
     df = read_to_pdf(en_path)
-    print(df)
+    print(estimate_emission_parameters('stress-related', 'B-NP', df))
