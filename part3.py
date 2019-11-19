@@ -1,6 +1,7 @@
 import pandas as pd
+import numpy as np
 
-en_path = 'EN/train copy'
+en_path = 'EN/train'
 
 
 def read_to_pdf(file_path):
@@ -24,19 +25,34 @@ def read_to_pdf(file_path):
             split_word_tags = word_tags.split(' ')
             words.append(split_word_tags[0])
             tags.append(split_word_tags[1])
-    df = pd.DataFrame(list(zip(words, tags)), columns =['words', 'tags']) 
+    tags_next = tags[1:]
+    df = pd.DataFrame(list(zip(words, tags, tags_next)), columns =['words', 'tags', 'tags_next']) 
+    df['tags_next'] = df['tags_next'].str.replace('START', '')
     return df
 
 
-def estimate_transmission_parameters(word, tag, df):
-    count_x_given_y = df[df['tags']==tag].words.str.count(word).sum()
-    count_y = df.tags.str.count(tag).sum()
-    return count_x_given_y/count_y
+def estimate_transmission_parameters(df):
+    """Return a dataframe with 
+    tag | next_tag | count_tag | count_transmission | transmission_prob
+
+    Parameters:
+    df (DataFrame): Dataframe with word, tags, tags_next
+
+    Returns:
+    df_transmission (DataFrame)
+    """
+    df['count_tag'] = df.groupby(['tags']).tags.transform(np.size)
+    df['count_transmission'] = df.groupby(['tags', 'tags_next']).tags.transform(np.size)
+    df.loc[df.tags_next == '', 'count_transmission'] = 0
+    df['transmission_probability'] = df['count_transmission'] / df['count_tag']
+    df = df.drop_duplicates(subset=['tags', 'tags_next'])
+    df = df.drop(['words'], axis=1)
+    df = df.sort_values(['tags','tags_next'])
+    return df
 
 
 if __name__=="__main__":
     '''Part 3 Qn 1: Test transition parameters'''
     df = read_to_pdf(en_path)
     print(df)
-    # df = smoothing(df)
-    # print(estimate_emission_parameters('stress-related', 'B-NP', df))
+    print(estimate_transmission_parameters(df))
