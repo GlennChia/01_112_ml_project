@@ -31,20 +31,20 @@ def read_to_pdf(file_path):
     return df
 
 
-def estimate_transmission_parameters(df):
+def estimate_transition_parameters(df):
     """Return a dataframe with 
-    tag | next_tag | count_tag | count_transmission | transmission_prob
+    tag | next_tag | count_tag | count_transition | transition_prob
 
     Parameters:
     df (DataFrame): Dataframe with word, tags, tags_next
 
     Returns:
-    df_transmission (DataFrame)
+    df (DataFrame)
     """
     df['count_tag'] = df.groupby(['tags']).tags.transform(np.size)
-    df['count_transmission'] = df.groupby(['tags', 'tags_next']).tags.transform(np.size)
-    df.loc[df.tags_next == '', 'count_transmission'] = 0
-    df['transmission_probability'] = df['count_transmission'] / df['count_tag']
+    df['count_transition'] = df.groupby(['tags', 'tags_next']).tags.transform(np.size)
+    df.loc[df.tags_next == '', 'count_transition'] = 0
+    df['transition_probability'] = df['count_transition'] / df['count_tag']
     df = df.drop_duplicates(subset=['tags', 'tags_next'])
     df = df.drop(['words'], axis=1)
     df = df.sort_values(['tags','tags_next'])
@@ -55,4 +55,4 @@ if __name__=="__main__":
     '''Part 3 Qn 1: Test transition parameters'''
     df = read_to_pdf(en_path)
     print(df)
-    print(estimate_transmission_parameters(df))
+    print(estimate_transition_parameters(df))
