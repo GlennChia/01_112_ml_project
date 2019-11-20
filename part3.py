@@ -48,6 +48,8 @@ def estimate_transition_parameters(df):
     df = df.drop_duplicates(subset=['tags', 'tags_next'])
     df = df.drop(['words'], axis=1)
     df = df.sort_values(['tags','tags_next'])
+    df = df.reset_index()
+    df = df.drop(['index'], axis=1)
     return df
 
 
