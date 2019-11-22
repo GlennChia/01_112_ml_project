@@ -1,6 +1,5 @@
 import pandas as pd
 
-en_path = 'EN/train'
 
 
 def readtopdftrain(file_path):
@@ -44,18 +43,80 @@ def replacewordtest(word, train):
     return "#UNK#"
 
 
-def estimate_emission_parameters(word, tag, df):
-    count_x_given_y = df[df['tags'] == tag].words.str.count(word).sum()
-    count_y = df.tags.str.count(tag).sum()
-    return count_x_given_y/count_y
+def estimate_emission_parameters(df):
+    """
+    Calculates the emission probabilities from count of words/ count of tags
+    :param df: raw word to tag map
+    :return: columns = count of word, count of tags, all emission probabilites of tag --> word
+    """
+    count_emit = df.groupby(['tags', 'words']).size().reset_index()
+    count_emit.columns =["tags", "words", "count_emit"]
+    count_tags = df.groupby(["tags"]).size().reset_index()
+    count_tags.columns = ["tags", "count_tags"]
 
+    count = pd.merge(count_emit, count_tags, on="tags")
+    count["emission"] = count["count_emit"]/count["count_tags"]
+
+    return count.drop(columns=["count_emit", "count_tags"])
+
+
+def get_emissionlookup(argmax_emission):
+    """
+    Map each word to tag of highest emission probability. This ensures lookup is in O(1) time.
+    :param argmax_emission: Dataframe with emission probabilities of each tag --> word
+    :return: Dictionary of word --> highest e(x|y) tag
+    """
+    ref_df = argmax_emission.groupby(["words"]).max().reset_index()
+    lookup = dict(zip(ref_df.words, ref_df.tags))
+    return lookup
+
+
+def get_tag_fromemission(lookup, smoothedtest, dataset):
+    output_file = dataset + "/dev.p2.out"
+    with open(output_file, "w") as f:
+        for i in smoothedtest["words"]:
+            f.write(i + " " + lookup[i] + "\n")
+    f.close()
+
+def sentiment_analysis(dataset):
+    train_path = dataset + "/train"
+    traindf = readtopdftrain(train_path)
+    smoothedtrain = smoothingtrain(traindf)
+    test_path = dataset + "/dev.in"
+    testdf = readtopdftest(test_path)
+    smoothedtest = smoothingtest(testdf, smoothedtrain)
+
+    argmax_emission = estimate_emission_parameters(traindf)
+    lookup = get_emissionlookup(argmax_emission)
+    get_tag_fromemission(lookup, smoothedtest, dataset)
+
+    print("Done with dataset " + train_path)
 
 if __name__=="__main__":
     '''Part 2 Qn 1: Test MLE'''
-    traindf = readtopdftrain(en_path)
-    smoothedtrain = smoothingtrain(traindf)
-    testfilepath = 'EN/dev.in'
-    testdf = readtopdftest(testfilepath)
-    smoothedtest = smoothingtest(testdf, smoothedtrain)
-    print(estimate_emission_parameters('stress-related', 'B-NP', smoothedtrain))
-    print(smoothedtest['words'].value_counts())
+
+    ### EN DATSET ###
+    # en_path = 'EN/train'
+    #     # traindf = readtopdftrain(en_path)
+    #     # smoothedtrain = smoothingtrain(traindf)
+    #     # testfilepath = 'EN/dev.in'
+    #     # testdf = readtopdftest(testfilepath)
+    #     # smoothedtest = smoothingtest(testdf, smoothedtrain)
+    #     #
+    #     # argmax_emission = estimate_emission_parameters(traindf)
+    #     # lookup = get_emissionlookup(argmax_emission)
+    #     # get_tag_fromemission(lookup, smoothedtest)
+
+
+    sentiment_analysis("EN")
+    # sentiment_analysis("CN")
+    # sentiment_analysis("AL")
+    sentiment_analysis("SG")
+
+
+
+
+
+
+
+
