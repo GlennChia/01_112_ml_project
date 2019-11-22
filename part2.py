@@ -1,10 +1,9 @@
 import pandas as pd
 
-en_path = 'EN/train'
 
 
 def readtopdftrain(file_path):
-    with open(file_path) as f_message:
+    with open(file_path, encoding="utf8") as f_message:
         temp = f_message.read().splitlines()
         temp = list(filter(None, temp))
     separated_word_tags = [word_tags.split(' ') for word_tags in temp]
@@ -13,7 +12,7 @@ def readtopdftrain(file_path):
 
 
 def readtopdftest(file_path):
-    with open(file_path) as f_message:
+    with open(file_path, encoding="utf8") as f_message:
         temp = f_message.read().splitlines()
         temp = list(filter(None, temp))
     df = pd.DataFrame(temp, columns=['words'])
@@ -52,6 +51,8 @@ def estimate_emission_parameters(word, tag, df):
 
 if __name__=="__main__":
     '''Part 2 Qn 1: Test MLE'''
+    en_path = 'EN/train'
+    cn_path = 'CN/train'
     traindf = readtopdftrain(en_path)
     smoothedtrain = smoothingtrain(traindf)
     testfilepath = 'EN/dev.in'
