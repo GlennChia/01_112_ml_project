@@ -3,7 +3,7 @@ import pandas as pd
 
 
 def readtopdftrain(file_path):
-    with open(file_path) as f_message:
+    with open(file_path, encoding="utf8") as f_message:
         temp = f_message.read().splitlines()
         temp = list(filter(None, temp))
     separated_word_tags = [word_tags.split(' ') for word_tags in temp]
@@ -12,7 +12,7 @@ def readtopdftrain(file_path):
 
 
 def readtopdftest(file_path):
-    with open(file_path) as f_message:
+    with open(file_path, encoding="utf8") as f_message:
         temp = f_message.read().splitlines()
         temp = list(filter(None, temp))
     df = pd.DataFrame(temp, columns=['words'])
@@ -112,11 +112,3 @@ if __name__=="__main__":
     # sentiment_analysis("CN")
     # sentiment_analysis("AL")
     sentiment_analysis("SG")
-
-
-
-
-
-
-
-
