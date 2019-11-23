@@ -181,7 +181,29 @@ def viterbi_algorithm(data_in, transition_full, emission_full):
                         # compute score
                         score_array.append(prev_state_value * emission * transition)
                 viterbi_tree[j+1][state] = max(score_array)
-    return viterbi_tree
+    # Find the state sequence
+    output_sequence = ['STOP']
+    for k in range(number_of_inner_layers, 0, -1):
+        # Iterate thorugh each state
+        highest_score = 0
+        for state, value in viterbi_tree[k].items():
+            if state != 'x_val':
+                # Find transition
+                transition = transition_full.loc[(transition_full['tags'] == state) & (transition_full['tags_next'] == output_sequence[-1]), 'transition_probability']#.iloc[0]
+                try:
+                    transition = transition.iloc[0]
+                except:
+                    transition = 0.0
+                # compute score
+                score = value * transition
+                if score > highest_score:
+                    highest_score = score
+                    chosen_state = state
+        output_sequence.append(chosen_state)
+    output_sequence.remove('STOP')
+    output_sequence.reverse()
+    data_in['predicted_states'] = output_sequence
+    return data_in
 
 
 if __name__=="__main__":
@@ -201,7 +223,7 @@ if __name__=="__main__":
     df_test = smoothingtest(df_test, df_en)
     #print(df_emission[df_emission['words'] == 'HBO'])
     #print(df_test)
-    print(pretty(viterbi_algorithm(df_test, df_transition, df_emission)))
+    print(viterbi_algorithm(df_test, df_transition, df_emission))
     # df_sg = read_to_pdf(sg_path)
     # print(df_sg)
     # print(estimate_transition_parameters(df_sg))
