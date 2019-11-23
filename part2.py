@@ -3,7 +3,7 @@ import pandas as pd
 
 
 def readtopdftrain(file_path):
-    with open(file_path) as f_message:
+    with open(file_path, encoding="utf8") as f_message:
         temp = f_message.read().splitlines()
         temp = list(filter(None, temp))
     separated_word_tags = [word_tags.split(' ') for word_tags in temp]
@@ -12,7 +12,7 @@ def readtopdftrain(file_path):
 
 
 def readtopdftest(file_path):
-    with open(file_path) as f_message:
+    with open(file_path, encoding="utf8") as f_message:
         temp = f_message.read().splitlines()
         temp = list(filter(None, temp))
     df = pd.DataFrame(temp, columns=['words'])
@@ -72,8 +72,15 @@ def get_emissionlookup(argmax_emission):
 
 
 def get_tag_fromemission(lookup, smoothedtest, dataset):
+    """
+    Retrieve tag for each word seen in testset
+    :param lookup: word --> Highest e(y|x) tag
+    :param smoothedtest: Processed testset to exclude non-occuring words in trainset
+    :param dataset: EN/ CN/ AL/ SG
+    :return: output file with allocated tags
+    """
     output_file = dataset + "/dev.p2.out"
-    with open(output_file, "w") as f:
+    with open(output_file, "w", encoding="utf8") as f:
         for i in smoothedtest["words"]:
             f.write(i + " " + lookup[i] + "\n")
     f.close()
@@ -95,22 +102,9 @@ def sentiment_analysis(dataset):
 if __name__=="__main__":
     '''Part 2 Qn 1: Test MLE'''
 
-    ### EN DATSET ###
-    # en_path = 'EN/train'
-    #     # traindf = readtopdftrain(en_path)
-    #     # smoothedtrain = smoothingtrain(traindf)
-    #     # testfilepath = 'EN/dev.in'
-    #     # testdf = readtopdftest(testfilepath)
-    #     # smoothedtest = smoothingtest(testdf, smoothedtrain)
-    #     #
-    #     # argmax_emission = estimate_emission_parameters(traindf)
-    #     # lookup = get_emissionlookup(argmax_emission)
-    #     # get_tag_fromemission(lookup, smoothedtest)
-
-
     sentiment_analysis("EN")
-    # sentiment_analysis("CN")
-    # sentiment_analysis("AL")
+    sentiment_analysis("CN")
+    sentiment_analysis("AL")
     sentiment_analysis("SG")
 
 
