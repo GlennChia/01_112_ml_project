@@ -1,7 +1,5 @@
 import pandas as pd
 
-en_path = 'EN/train'
-
 
 def readtopdftrain(file_path):
     with open(file_path) as f_message:
@@ -52,9 +50,10 @@ def estimate_emission_parameters(word, tag, df):
 
 if __name__=="__main__":
     '''Part 2 Qn 1: Test MLE'''
-    traindf = readtopdftrain(en_path)
+    trainpath = 'AL/train'
+    traindf = readtopdftrain(trainpath)
     smoothedtrain = smoothingtrain(traindf)
-    testfilepath = 'EN/dev.in'
+    testfilepath = 'AL/dev.in'
     testdf = readtopdftest(testfilepath)
     smoothedtest = smoothingtest(testdf, smoothedtrain)
     print(estimate_emission_parameters('stress-related', 'B-NP', smoothedtrain))
