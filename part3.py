@@ -37,8 +37,16 @@ def read_to_pdf(file_path):
 def read_to_pdf_test(file_path):
     with open(file_path, encoding="utf8") as f_message:
         temp = f_message.read().splitlines()
-        temp = list(filter(None, temp))
-    df = pd.DataFrame(temp, columns=['words'])
+
+    words = []
+    sentenceid = 0
+    for word in temp:
+        if word != "":
+            words.append([word, sentenceid])
+        else:
+            sentenceid += 1
+
+    df = pd.DataFrame(words, columns=['words', 'sentence id'])
     return df
 
 
@@ -103,18 +111,25 @@ def smoothingtest(testdata, traindata):
     return testdata
 
 
-class Node:
-    def __init__(self, state, weight=0):
-        self._state = state
-        # self._transition = transition
-        # self._emission = emission
-        self._weight = weight
+def viterbi_all(data_in, transition_full, emission_full):
+    numsentences = max(data_in['sentence id'])
+    grouped_data = data_in.groupby('sentence id')
+    newdf = pd.DataFrame({'words': [], 'predicted_states': []})
 
-class ViterbiTree:
-    def __init__(self, layers):
-        self.layers = [[] for i in range(layers)]
+    states = transition_full.tags.unique().tolist()
+    states.remove('STOP')
+    states.remove('START')
+    number_of_states = len(states)
+    viterbi_tree = populate_viterbi_tree(len(data_in), states, data_in)
 
-def viterbi_algorithm(data_in, transition_full, emission_full):
+    for i in range(0, numsentences + 1):
+        viterbidf = viterbi_algo_onesentence(grouped_data.get_group(i), transition_full, emission_full, viterbi_tree)
+        newdf = pd.concat([newdf, viterbidf])
+    return newdf
+
+
+def viterbi_algo_onesentence(data_in, transition_full, emission_full, viterbi_tree):
+    print(data_in)
     number_of_inner_layers = len(data_in) # change this when we work with more examples
     # viterbi_tree = ViterbiTree(number_of_inner_layers + 2)
     '''
@@ -136,10 +151,15 @@ def viterbi_algorithm(data_in, transition_full, emission_full):
     }
 }
     '''
-    states = transition_full.tags.unique().tolist()
-    states.remove('STOP')
-    states.remove('START')
-    number_of_states = len(states)
+    # Compute updated weights
+    # iterate through each layer
+    viterbi_tree = compute_viterbi_scores(viterbi_tree, number_of_inner_layers, emission_full, transition_full)
+    # Find the state sequence
+    data_in = find_state_sequence(number_of_inner_layers, viterbi_tree, transition_full, data_in)
+    return data_in
+
+
+def populate_viterbi_tree(number_of_inner_layers, states, data_in):
     viterbi_tree = {}
     for i in range(number_of_inner_layers + 2):
         if i == 0:
@@ -156,15 +176,18 @@ def viterbi_algorithm(data_in, transition_full, emission_full):
                 indiv_dict[state] = 0
             clone_dict = deepcopy(indiv_dict)
             viterbi_tree[i] = clone_dict
-            viterbi_tree[i]['x_val'] = data_in.iloc[i-1]['words']
-    # Compute updated weights
-    # iterate through each layer
+            viterbi_tree[i]['x_val'] = data_in.iloc[i - 1]['words']
+
+    return viterbi_tree
+
+
+def compute_viterbi_scores(viterbi_tree, number_of_inner_layers, emission_full, transition_full):
     for j in range(number_of_inner_layers):
         # iterate thorugh each state
         for state in viterbi_tree[j+1].keys():
             if state != "x_val":
                 # get emission
-                emission = emission_full.loc[(emission_full['tags'] == state) & (emission_full['words'] == viterbi_tree[j+1]["x_val"]), 'emission']#.iloc[0] 
+                emission = emission_full.loc[(emission_full['tags'] == state) & (emission_full['words'] == viterbi_tree[j+1]["x_val"]), 'emission']#.iloc[0]
                 try:
                     emission = emission.iloc[0]
                 except:
@@ -181,10 +204,13 @@ def viterbi_algorithm(data_in, transition_full, emission_full):
                         # compute score
                         score_array.append(prev_state_value * emission * transition)
                 viterbi_tree[j+1][state] = max(score_array)
-    # Find the state sequence
+
+    return viterbi_tree
+
+def find_state_sequence(number_of_inner_layers, viterbi_tree, transition_full, data_in):
     output_sequence = ['STOP']
     for k in range(number_of_inner_layers, 0, -1):
-        # Iterate thorugh each state
+        # Iterate through each state
         highest_score = 0
         for state, value in viterbi_tree[k].items():
             if state != 'x_val':
@@ -214,16 +240,16 @@ if __name__=="__main__":
     cn_path = 'CN/train'
     df_en = read_to_pdf(en_path)
     df_en = smoothingtrain(df_en)
-    #print(df_en)
+    # print(df_en)
     df_transition = estimate_transition_parameters(df_en)
     # print(df_transition)
     df_emission = estimate_emission_parameters(df_en)
     #print(df_emission)
-    df_test = read_to_pdf_test('EN/dev copy.in')
+    df_test = read_to_pdf_test('EN/dev.in')
     df_test = smoothingtest(df_test, df_en)
     #print(df_emission[df_emission['words'] == 'HBO'])
     #print(df_test)
-    print(viterbi_algorithm(df_test, df_transition, df_emission))
+    print(viterbi_all(df_test, df_transition, df_emission))
     # df_sg = read_to_pdf(sg_path)
     # print(df_sg)
     # print(estimate_transition_parameters(df_sg))
