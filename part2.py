@@ -106,11 +106,3 @@ if __name__=="__main__":
     sentiment_analysis("CN")
     sentiment_analysis("AL")
     sentiment_analysis("SG")
-
-
-
-
-
-
-
-
