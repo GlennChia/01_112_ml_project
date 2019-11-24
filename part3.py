@@ -116,19 +116,13 @@ def viterbi_all(data_in, transition_full, emission_full):
     grouped_data = data_in.groupby('sentence id')
     newdf = pd.DataFrame({'words': [], 'predicted_states': []})
 
-    states = transition_full.tags.unique().tolist()
-    states.remove('STOP')
-    states.remove('START')
-    number_of_states = len(states)
-    viterbi_tree = populate_viterbi_tree(len(data_in), states, data_in)
-
     for i in range(0, numsentences + 1):
-        viterbidf = viterbi_algo_onesentence(grouped_data.get_group(i), transition_full, emission_full, viterbi_tree)
+        viterbidf = viterbi_algo_onesentence(grouped_data.get_group(i), transition_full, emission_full)
         newdf = pd.concat([newdf, viterbidf])
     return newdf
 
 
-def viterbi_algo_onesentence(data_in, transition_full, emission_full, viterbi_tree):
+def viterbi_algo_onesentence(data_in, transition_full, emission_full):
     print(data_in)
     number_of_inner_layers = len(data_in) # change this when we work with more examples
     # viterbi_tree = ViterbiTree(number_of_inner_layers + 2)
@@ -151,6 +145,11 @@ def viterbi_algo_onesentence(data_in, transition_full, emission_full, viterbi_tr
     }
 }
     '''
+    states = transition_full.tags.unique().tolist()
+    states.remove('STOP')
+    states.remove('START')
+    number_of_states = len(states)
+    viterbi_tree = populate_viterbi_tree(len(data_in), states, data_in)
     # Compute updated weights
     # iterate through each layer
     viterbi_tree = compute_viterbi_scores(viterbi_tree, number_of_inner_layers, emission_full, transition_full)
@@ -222,6 +221,7 @@ def find_state_sequence(number_of_inner_layers, viterbi_tree, transition_full, d
                     transition = 0.0
                 # compute score
                 score = value * transition
+                print(score)
                 if score > highest_score:
                     highest_score = score
                     chosen_state = state

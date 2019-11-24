@@ -58,5 +58,6 @@ if __name__=="__main__":
     testfilepath = 'EN/dev.in'
     testdf = readtopdftest(testfilepath)
     smoothedtest = smoothingtest(testdf, smoothedtrain)
+    print(traindf)
     print(estimate_emission_parameters('stress-related', 'B-NP', smoothedtrain))
     print(smoothedtest['words'].value_counts())
