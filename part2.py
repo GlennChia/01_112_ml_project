@@ -12,12 +12,19 @@ def readtopdftrain(file_path):
     df["words"] = [i.strip() for i in df.words]
     return df
 
-
 def readtopdftest(file_path):
     with open(file_path, encoding="utf8") as f_message:
         temp = f_message.read().splitlines()
-        temp = list(filter(None, temp))
-    df = pd.DataFrame(temp, columns=['words'])
+
+    words = []
+    sentenceid = 0
+    for word in temp:
+        if word != "":
+            words.append([word, sentenceid])
+        else:
+            sentenceid += 1
+
+    df = pd.DataFrame(words, columns=['words', 'sentence id'])
     return df
 
 
@@ -68,12 +75,8 @@ def get_emissionlookup(argmax_emission):
     :param argmax_emission: Dataframe with emission probabilities of each tag --> word
     :return: Dictionary of word --> highest e(x|y) tag
     """
-    # ref_df = argmax_emission.groupby(["words"])
-    print_full(argmax_emission.groupby(["words", "tags"]).max().reset_index())
     ref_df = argmax_emission.groupby(["words"]).max(axis=["emission"]).reset_index()
-    print_full(ref_df)
     lookup = dict(zip(ref_df.words, ref_df.tags))
-    print(lookup)
     return lookup
 
 
@@ -87,8 +90,13 @@ def get_tag_fromemission(lookup, smoothedtest, dataset):
     """
     output_file = dataset + "/dev.p2.out"
     with open(output_file, "w", encoding="utf8") as f:
-        for i in smoothedtest["words"]:
-            f.write(i + " " + lookup[i] + "\n")
+        sentenceid = 0
+        for index, row in smoothedtest.iterrows():
+            if row['sentence id'] != sentenceid:
+                f.write("\n")
+                sentenceid += 1
+            else:
+                f.write(row['words'] + " " + lookup[row['words']] + "\n")
     f.close()
 
 def sentiment_analysis(dataset):
@@ -103,11 +111,6 @@ def sentiment_analysis(dataset):
     get_tag_fromemission(lookup, smoothedtest, dataset)
 
     print("Done with dataset " + train_path)
-
-def print_full(x):
-    pd.set_option('display.max_rows', len(x))
-    print(x)
-    pd.reset_option('display.max_rows')
 
 if __name__=="__main__":
     '''Part 2 Qn 1: Test MLE'''
