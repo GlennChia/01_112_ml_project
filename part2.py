@@ -7,7 +7,9 @@ def readtopdftrain(file_path):
         temp = f_message.read().splitlines()
         temp = list(filter(None, temp))
     separated_word_tags = [word_tags.split(' ') for word_tags in temp]
+    # separated_word_tags = [word.strip() for l in separated_word_tags for word in l]
     df = pd.DataFrame(separated_word_tags, columns=['words', 'tags'])
+    df["words"] = [i.strip() for i in df.words]
     return df
 
 
@@ -66,7 +68,9 @@ def get_emissionlookup(argmax_emission):
     :param argmax_emission: Dataframe with emission probabilities of each tag --> word
     :return: Dictionary of word --> highest e(x|y) tag
     """
-    ref_df = argmax_emission.groupby(["words"]).max().reset_index()
+    # ref_df = argmax_emission.groupby(["words"])
+    ref_df = argmax_emission.groupby(["words"]).max(axis=["emission"]).reset_index()
+    print(print_full(ref_df))
     lookup = dict(zip(ref_df.words, ref_df.tags))
     return lookup
 
@@ -92,12 +96,16 @@ def sentiment_analysis(dataset):
     test_path = dataset + "/dev.in"
     testdf = readtopdftest(test_path)
     smoothedtest = smoothingtest(testdf, smoothedtrain)
-
-    argmax_emission = estimate_emission_parameters(traindf)
+    argmax_emission = estimate_emission_parameters(smoothedtrain)
     lookup = get_emissionlookup(argmax_emission)
     get_tag_fromemission(lookup, smoothedtest, dataset)
 
     print("Done with dataset " + train_path)
+
+def print_full(x):
+    pd.set_option('display.max_rows', len(x))
+    print(x)
+    pd.reset_option('display.max_rows')
 
 if __name__=="__main__":
     '''Part 2 Qn 1: Test MLE'''
@@ -106,3 +114,5 @@ if __name__=="__main__":
     sentiment_analysis("CN")
     sentiment_analysis("AL")
     sentiment_analysis("SG")
+    #
+
