@@ -94,6 +94,7 @@ def get_tag_fromemission(lookup, smoothedtest, dataset):
         for index, row in smoothedtest.iterrows():
             if row['sentence id'] != sentenceid:
                 f.write("\n")
+                f.write(row['words'] + " " + lookup[row['words']] + "\n")
                 sentenceid += 1
             else:
                 f.write(row['words'] + " " + lookup[row['words']] + "\n")
