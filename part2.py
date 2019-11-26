@@ -69,9 +69,11 @@ def get_emissionlookup(argmax_emission):
     :return: Dictionary of word --> highest e(x|y) tag
     """
     # ref_df = argmax_emission.groupby(["words"])
+    print_full(argmax_emission.groupby(["words", "tags"]).max().reset_index())
     ref_df = argmax_emission.groupby(["words"]).max(axis=["emission"]).reset_index()
-    print(print_full(ref_df))
+    print_full(ref_df)
     lookup = dict(zip(ref_df.words, ref_df.tags))
+    print(lookup)
     return lookup
 
 
@@ -111,8 +113,8 @@ if __name__=="__main__":
     '''Part 2 Qn 1: Test MLE'''
 
     sentiment_analysis("EN")
-    sentiment_analysis("CN")
-    sentiment_analysis("AL")
-    sentiment_analysis("SG")
-    #
+    # sentiment_analysis("CN")
+    # sentiment_analysis("AL")
+    # sentiment_analysis("SG")
+
 

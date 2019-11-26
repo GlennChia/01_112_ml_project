@@ -83,7 +83,7 @@ class node():
         self.n = n
         self.score = 0
         self.parent = ""
-        self.tag = ""
+        self.subpath = ""
 
 class viterbi():
     def __init__(self, emission, transition, sentence, tags):
@@ -197,7 +197,7 @@ class viterbi():
                 # all_nodes[0][i] = node(0, i)
                 last_node = node(0, i)
                 last_node.parent = all_nodes[tag_idx][-1]
-                last_node.tag = tag
+                last_node.subpath = tag
 
             else:
                 idx = 0
@@ -213,11 +213,10 @@ class viterbi():
                             all_scores.append(score)
                         idx_k += 1
                     tree[idx, i] = max(all_scores)
-
                     tag_idx = all_scores.index(max(all_scores))
                     tag = self.t[tag_idx]
                     # all_nodes[idx][i] = node(idx, i)
-                    all_nodes[idx][i-1].tag = tag
+                    all_nodes[idx][i-1].subpath = tag
                     if i != 1:
                         all_nodes[idx][i-1].parent = all_nodes[tag_idx][i-2]
                     else:
@@ -228,7 +227,7 @@ class viterbi():
         path = []
         current_node = last_node
         for i in range(len(self.sentence), 0,  -1):
-            path.insert(0, current_node.tag)
+            path.insert(0, current_node.subpath)
             current_node = current_node.parent
         print(path)
 
@@ -252,6 +251,7 @@ class viterbi():
         :return: np.array of size (n, t, k). see build_tree_2 for more details.
         """
         tree = self.build_tree_2(k_best)
+        all_nodes = [[node(j, i) for j in range(len(self.t))] for i in range(len(self.sentence))]
 
         for i in range(len(self.sentence) + 1):
             if i == 0:
@@ -281,7 +281,6 @@ class viterbi():
                     final_score.append(maxi)
                     flat_scores.remove(maxi)
 
-
             else:
                 idx = 0
                 for j in self.t:
@@ -301,6 +300,14 @@ class viterbi():
                     for l in range(k_best):
                         maxi = max(flat_scores)
                         tree[idx, i, l] = maxi
+
+                        # tag = self.t[tag_idx]
+                        # all_nodes[idx][i - 1].subpath = tag
+                        # if i != 1:
+                        #     all_nodes[idx][i - 1].parent = all_nodes[tag_idx][i - 2]
+                        # else:
+                        #     pass
+
                         flat_scores.remove(maxi)
                     idx += 1
         return tree, final_score
@@ -329,8 +336,6 @@ def get_emission_lookup(df_emission):
         emission_lookup[(df_emission.tags[i], df_emission.words[i])] = df_emission.emission[i]
     return emission_lookup
 
-
-
 # df_emission = estimate_emission_parameters(df_en)
 # emission_lookup = get_emission_lookup(df_emission)
 #
@@ -342,7 +347,6 @@ def get_emission_lookup(df_emission):
 # test = viterbi(emission_lookup, transmission_lookup, sentence, tags)
 # print(test.get_score(9, 1))
 
-
 transition_lookup = {("START", "A"): 1.0, ("A", "A"): 0.5 , ("A", "B"): 0.5, ("B", "B"): 0.8, ("B", "STOP"): 0.2}
 emission_lookup = {("A", "the"): 0.9, ("A", "dog"): 0.1, ("B", "the"): 0.1, ("B", "dog"): 0.9}
 
@@ -350,6 +354,6 @@ sentence = "the dog the"
 print(sentence.split(" "))
 test = viterbi(emission_lookup, transition_lookup, sentence, ["A", "B"])
 print(test.populate_tree())
-print(test.populate_tree_2(1))
+print(test.populate_tree_2(4))
 # print(test.populate_tree_2(2))
 # print(test.path)
