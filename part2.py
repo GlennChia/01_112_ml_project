@@ -1,7 +1,6 @@
 import pandas as pd
 
 
-
 def readtopdftrain(file_path):
     with open(file_path, encoding="utf8") as f_message:
         temp = f_message.read().splitlines()
@@ -123,8 +122,8 @@ if __name__=="__main__":
     '''
 
     sentiment_analysis("EN")
-    # sentiment_analysis("CN")
-    # sentiment_analysis("AL")
-    # sentiment_analysis("SG")
+    sentiment_analysis("CN")
+    sentiment_analysis("AL")
+    sentiment_analysis("SG")
 
 
