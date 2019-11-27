@@ -65,7 +65,6 @@ def estimate_emission_parameters(df):
 
     count = pd.merge(count_emit, count_tags, on="tags")
     count["emission"] = count["count_emit"]/count["count_tags"]
-
     return count.drop(columns=["count_emit", "count_tags"])
 
 
@@ -75,8 +74,9 @@ def get_emissionlookup(argmax_emission):
     :param argmax_emission: Dataframe with emission probabilities of each tag --> word
     :return: Dictionary of word --> highest e(x|y) tag
     """
-    ref_df = argmax_emission.groupby(["words"]).max(axis=["emission"]).reset_index()
-    lookup = dict(zip(ref_df.words, ref_df.tags))
+    idx = argmax_emission.groupby(['words'])['emission'].transform(max) == argmax_emission['emission']
+    argmax_emission = argmax_emission[idx]
+    lookup = dict(zip(argmax_emission.words, argmax_emission.tags))
     return lookup
 
 
@@ -115,6 +115,12 @@ def sentiment_analysis(dataset):
 
 if __name__=="__main__":
     '''Part 2 Qn 1: Test MLE'''
+    ''' Run the test code with 
+    python .\EvalScript\evalResult.py EN/dev.out EN/dev.p2.out
+    python .\EvalScript\evalResult.py CN/dev.out CN/dev.p2.out
+    python .\EvalScript\evalResult.py AL/dev.out AL/dev.p2.out
+    python .\EvalScript\evalResult.py SG/dev.out SG/dev.p2.out
+    '''
 
     sentiment_analysis("EN")
     # sentiment_analysis("CN")
