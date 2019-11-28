@@ -1,7 +1,5 @@
 import numpy as np
 import pandas as pd
-import itertools
-import copy
 
 def read_to_pdf(file_path):
     with open(file_path, encoding='utf8') as f_message:
@@ -213,9 +211,6 @@ transition_lookup = {("START", "A"): 1.0, ("A", "A"): 0.5 , ("A", "B"): 0.5, ("B
 emission_lookup = {("A", "the"): 0.9, ("A", "dog"): 0.1, ("B", "the"): 0.1, ("B", "dog"): 0.9}
 
 sentence = "the dog the"
-# print(sentence.split(" "))
 test = viterbi(emission_lookup, transition_lookup, sentence, ["A", "B"])
 print(test.populate_tree_2(2))
-# print(test.path)
 
-print(("A", "A") in transition_lookup)
