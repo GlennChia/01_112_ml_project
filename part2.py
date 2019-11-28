@@ -1,7 +1,6 @@
 import pandas as pd
 
 
-
 def readtopdftrain(file_path):
     with open(file_path, encoding="utf8") as f_message:
         temp = f_message.read().splitlines()
@@ -12,12 +11,19 @@ def readtopdftrain(file_path):
     df["words"] = [i.strip() for i in df.words]
     return df
 
-
 def readtopdftest(file_path):
     with open(file_path, encoding="utf8") as f_message:
         temp = f_message.read().splitlines()
-        temp = list(filter(None, temp))
-    df = pd.DataFrame(temp, columns=['words'])
+
+    words = []
+    sentenceid = 0
+    for word in temp:
+        if word != "":
+            words.append([word, sentenceid])
+        else:
+            sentenceid += 1
+
+    df = pd.DataFrame(words, columns=['words', 'sentence id'])
     return df
 
 
@@ -58,7 +64,6 @@ def estimate_emission_parameters(df):
 
     count = pd.merge(count_emit, count_tags, on="tags")
     count["emission"] = count["count_emit"]/count["count_tags"]
-
     return count.drop(columns=["count_emit", "count_tags"])
 
 
@@ -68,12 +73,9 @@ def get_emissionlookup(argmax_emission):
     :param argmax_emission: Dataframe with emission probabilities of each tag --> word
     :return: Dictionary of word --> highest e(x|y) tag
     """
-    # ref_df = argmax_emission.groupby(["words"])
-    print_full(argmax_emission.groupby(["words", "tags"]).max().reset_index())
-    ref_df = argmax_emission.groupby(["words"]).max(axis=["emission"]).reset_index()
-    print_full(ref_df)
-    lookup = dict(zip(ref_df.words, ref_df.tags))
-    print(lookup)
+    idx = argmax_emission.groupby(['words'])['emission'].transform(max) == argmax_emission['emission']
+    argmax_emission = argmax_emission[idx]
+    lookup = dict(zip(argmax_emission.words, argmax_emission.tags))
     return lookup
 
 
@@ -87,8 +89,14 @@ def get_tag_fromemission(lookup, smoothedtest, dataset):
     """
     output_file = dataset + "/dev.p2.out"
     with open(output_file, "w", encoding="utf8") as f:
-        for i in smoothedtest["words"]:
-            f.write(i + " " + lookup[i] + "\n")
+        sentenceid = 0
+        for index, row in smoothedtest.iterrows():
+            if row['sentence id'] != sentenceid:
+                f.write("\n")
+                f.write(row['words'] + " " + lookup[row['words']] + "\n")
+                sentenceid += 1
+            else:
+                f.write(row['words'] + " " + lookup[row['words']] + "\n")
     f.close()
 
 def sentiment_analysis(dataset):
@@ -104,17 +112,18 @@ def sentiment_analysis(dataset):
 
     print("Done with dataset " + train_path)
 
-def print_full(x):
-    pd.set_option('display.max_rows', len(x))
-    print(x)
-    pd.reset_option('display.max_rows')
-
 if __name__=="__main__":
     '''Part 2 Qn 1: Test MLE'''
+    ''' Run the test code with 
+    python .\EvalScript\evalResult.py EN/dev.out EN/dev.p2.out
+    python .\EvalScript\evalResult.py CN/dev.out CN/dev.p2.out
+    python .\EvalScript\evalResult.py AL/dev.out AL/dev.p2.out
+    python .\EvalScript\evalResult.py SG/dev.out SG/dev.p2.out
+    '''
 
     sentiment_analysis("EN")
-    # sentiment_analysis("CN")
-    # sentiment_analysis("AL")
-    # sentiment_analysis("SG")
+    sentiment_analysis("CN")
+    sentiment_analysis("AL")
+    sentiment_analysis("SG")
 
 
