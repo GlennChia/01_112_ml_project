@@ -6,22 +6,37 @@ import numpy as np
 class clean_trainset():
     def __init__(self, file_path):
         self.file_path = file_path
-        self.raw = self.readtopdftrain()
+        self.raw = self.read_to_pdf()
         self.smoothed = self.smoothingtrain()
-        # self.emission_df = self.estimate_emission_parameters()
-        # self.emission_lookup = self.get_emissionlookup()
-        # self.transition_df = self.estimate_transition_parameters()
-        # self.transition_lookup =
+        self.emission_df = self.estimate_emission_parameters()
+        self.emission_lookup = self.get_emissionlookup()
+        self.transition_df = self.estimate_transition_parameters()
+        self.transition_lookup = self.estimate_transition_parameters()
 
-
-    def readtopdftrain(self):
-        with open(self.file_path, encoding="utf8") as f_message:
+    def read_to_pdf(self):
+        with open(self.file_path, encoding='utf8') as f_message:
             temp = f_message.read().splitlines()
-            temp = list(filter(None, temp))
-        separated_word_tags = [word_tags.split(' ') for word_tags in temp]
-        # separated_word_tags = [word.strip() for l in separated_word_tags for word in l]
-        df = pd.DataFrame(separated_word_tags, columns=['words', 'tags'])
-        df["words"] = [i.strip() for i in df.words]
+        words = []
+        tags = []
+        for index, word_tags in enumerate(temp):
+            if index == 0:
+                words.append('')
+                tags.append('START')
+            elif index == len(temp) - 1:
+                words.append('')
+                tags.append('STOP')
+            elif word_tags == '':
+                words.append('')
+                tags.append('STOP')
+                words.append('')
+                tags.append('START')
+            else:
+                split_word_tags = word_tags.split(' ')
+                words.append(split_word_tags[0])
+                tags.append(split_word_tags[1])
+        tags_next = tags[1:]
+        df = pd.DataFrame(list(zip(words, tags, tags_next)), columns=['words', 'tags', 'tags_next'])
+        df['tags_next'] = df['tags_next'].str.replace('START', '')
         return df
 
     def replaceword(self, word, word_counts, k):
@@ -85,4 +100,4 @@ class clean_trainset():
 
 
 cleandata = clean_trainset("EN/train")
-print(cleandata.smoothed)
+print(cleandata.transition_df)
