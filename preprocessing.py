@@ -8,10 +8,12 @@ class clean_trainset():
         self.file_path = file_path
         self.raw = self.read_to_pdf()
         self.smoothed = self.smoothingtrain()
+
         self.emission_df = self.estimate_emission_parameters()
-        self.emission_lookup = self.get_emissionlookup()
-        self.transition_df = self.estimate_transition_parameters()
-        self.transition_lookup = self.estimate_transition_parameters()
+        # self.emission_lookup = self.get_emissionlookup()
+
+        # self.transition_df = self.estimate_transition_parameters()
+        # self.transition_lookup = self.get_transition_lookup()
 
     def read_to_pdf(self):
         with open(self.file_path, encoding='utf8') as f_message:
@@ -44,6 +46,7 @@ class clean_trainset():
             return "#UNK#"
         return word
 
+
     def smoothingtrain(self, k=3):
         word_counts = self.raw['words'].value_counts().to_dict()
         self.raw['words'] = self.raw['words'].apply(lambda word: self.replaceword(word, word_counts, k))
@@ -56,6 +59,7 @@ class clean_trainset():
         :param df: raw word to tag map
         :return: columns = count of word, count of tags, all emission probabilites of tag --> word
         """
+
         count_emit = self.smoothed.groupby(['tags', 'words']).size().reset_index()
         count_emit.columns = ["tags", "words", "count_emit"]
         count_tags = self.smoothed.groupby(["tags"]).size().reset_index()
@@ -71,10 +75,10 @@ class clean_trainset():
         :param argmax_emission: Dataframe with emission probabilities of each tag --> word
         :return: Dictionary of word --> highest e(x|y) tag
         """
-        idx = self.emission_df.groupby(['words'])['emission'].transform(max) == self.emission_df['emission']
-        argmax_emission = self.emission_df[idx]
-        lookup = dict(zip(argmax_emission.words, argmax_emission.tags))
-        return lookup
+        return {(i, j ): k for i, j, k in
+                zip(self.emission_df["tags"],
+                    self.emission_df["words"],
+                    self.emission_df["emission"])}
 
     def estimate_transition_parameters(self):
         """Return a dataframe with
@@ -98,6 +102,15 @@ class clean_trainset():
         out = out.drop(['index'], axis=1)
         return out
 
+    def get_transition_lookup(self):
+        return {(i, j ): k for i, j, k in
+                zip(self.emission_df["tags"],
+                    self.emission_df["tags_next"],
+                    self.emission_df["transition_probability"])}
+
+
+
 
 cleandata = clean_trainset("EN/train")
-print(cleandata.transition_df)
+print(cleandata.emission_df)
+print(cleandata.get_emissionlookup())
