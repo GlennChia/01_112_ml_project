@@ -1,80 +1,6 @@
 import numpy as np
-import pandas as pd
+import preprocessing
 
-def read_to_pdf(file_path):
-    with open(file_path, encoding='utf8') as f_message:
-        temp = f_message.read().splitlines()
-    words = []
-    tags = []
-    for index, word_tags in enumerate(temp):
-        if index == 0:
-            words.append('')
-            tags.append('START')
-        elif index == len(temp) - 1:
-            words.append('')
-            tags.append('STOP')
-        elif word_tags == '':
-            words.append('')
-            tags.append('STOP')
-            words.append('')
-            tags.append('START')
-        else:
-            split_word_tags = word_tags.split(' ')
-            words.append(split_word_tags[0])
-            tags.append(split_word_tags[1])
-    tags_next = tags[1:]
-    df = pd.DataFrame(list(zip(words, tags, tags_next)), columns =['words', 'tags', 'tags_next'])
-    df['tags_next'] = df['tags_next'].str.replace('START', '')
-    return df
-
-
-def replacewordtrain(word, word_counts, k):
-    if word_counts[word] < k:
-        return "#UNK#"
-    return word
-
-
-def smoothingtrain(data, k=3):
-    word_counts = data['words'].value_counts().to_dict()
-    data['words'] = data['words'].apply(lambda word: replacewordtrain(word, word_counts, k))
-    return data
-
-def estimate_emission_parameters(df):
-    """
-    Calculates the emission probabilities from count of words/ count of tags
-    :param df: raw word to tag map
-    :return: columns = count of word, count of tags, all emission probabilites of tag --> word
-    """
-    count_emit = df.groupby(['tags', 'words']).size().reset_index()
-    count_emit.columns =["tags", "words", "count_emit"]
-    count_tags = df.groupby(["tags"]).size().reset_index()
-    count_tags.columns = ["tags", "count_tags"]
-
-    count = pd.merge(count_emit, count_tags, on="tags")
-    count["emission"] = count["count_emit"]/count["count_tags"]
-
-    return count.drop(columns=["count_emit", "count_tags"])
-
-def estimate_transition_parameters(df):
-    """Return a dataframe with
-    tag | next_tag | count_tag | count_transition | transition_prob
-
-    Parameters:
-    df (DataFrame): Dataframe with word, tags, tags_next
-
-    Returns:
-    df (DataFrame)
-    """
-    df['count_tag'] = df.groupby(['tags']).tags.transform(np.size)
-    df['count_transition'] = df.groupby(['tags', 'tags_next']).tags.transform(np.size)
-    df.loc[df.tags_next == '', 'count_transition'] = 0
-    df['transition_probability'] = df['count_transition'] / df['count_tag']
-    df = df.drop_duplicates(subset=['tags', 'tags_next'])
-    df = df.drop(['words'], axis=1)
-    df = df.sort_values(['tags','tags_next'])
-    df = df.reset_index()
-    df = df.drop(['index'], axis=1)
-    return df
 
 def k_largest_index_argsort(a, k):
     idx = np.argsort(a.ravel())[:-k-1:-1]
@@ -195,22 +121,47 @@ class viterbi():
                         current_node.subpath = self.t[j_coord]
                     idx_k += 1
 
-        k_paths = []
-        for a in range(k_best):
-            path = []
-            current_node = last_layer[a]
-            for i in range(len(self.sentence), 0, -1):
-                path.insert(0, current_node.subpath)
-                current_node = current_node.parent
+        # ---! following commented lines return ALL k best paths !---
+        # k_paths = []
+        # for a in range(k_best):
+        #     path = []
+        #     current_node = last_layer[a]
+        #     for i in range(len(self.sentence), 0, -1):
+        #         path.insert(0, current_node.subpath)
+        #         current_node = current_node.parent
+        #
+        #     k_paths.append(path)
 
-            k_paths.append(path)
+        kth_path = []
+        kth_best = last_layer[-1]
+        for i in range(len(self.sentence), 0, -1):
+            kth_path.insert(0, kth_best.subpath)
+            kth_best = kth_best.parent
 
-        return tree, final_score, k_paths
+        # return tree, final_score, k_paths
+        return kth_path
 
-transition_lookup = {("START", "A"): 1.0, ("A", "A"): 0.5 , ("A", "B"): 0.5, ("B", "B"): 0.8, ("B", "STOP"): 0.2}
-emission_lookup = {("A", "the"): 0.9, ("A", "dog"): 0.1, ("B", "the"): 0.1, ("B", "dog"): 0.9}
+# transition_lookup = {("START", "A"): 1.0, ("A", "A"): 0.5 , ("A", "B"): 0.5, ("B", "B"): 0.8, ("B", "STOP"): 0.2}
+# emission_lookup = {("A", "the"): 0.9, ("A", "dog"): 0.1, ("B", "the"): 0.1, ("B", "dog"): 0.9}
+# sentence = "the dog the"
+# test = viterbi(emission_lookup, transition_lookup, sentence, ["A", "B"])
+# print(test.populate_tree_2(2))
 
-sentence = "the dog the"
-test = viterbi(emission_lookup, transition_lookup, sentence, ["A", "B"])
-print(test.populate_tree_2(2))
+
+cleandata = preprocessing.clean_trainset("EN/train")
+cleantest = preprocessing.clean_testset("EN/dev.in", cleandata.smoothed)
+
+emission = cleandata.emission_lookup
+transition = cleandata.transition_lookup
+
+for sentence in cleantest.get_all_sentences():
+    obj = viterbi(emission, transition, sentence, cleandata.tags)
+    pred_tags = obj.populate_tree_2(1)
+    with open("EN/dev.p4.out", "a") as f:
+        count = 0
+        for word in sentence:
+            f.write("word " + pred_tags[0] + "\n")
+            count += 1
+        f.write("\n")
+
 

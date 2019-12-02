@@ -10,10 +10,13 @@ class clean_trainset():
         self.smoothed = self.smoothingtrain()
 
         self.emission_df = self.estimate_emission_parameters()
-        # self.emission_lookup = self.get_emissionlookup()
+        self.emission_lookup = self.get_emissionlookup()
 
-        # self.transition_df = self.estimate_transition_parameters()
-        # self.transition_lookup = self.get_transition_lookup()
+        self.transition_df = self.estimate_transition_parameters()
+        self.transition_lookup = self.get_transition_lookup()
+
+        self.tags = self.get_tags()
+
 
     def read_to_pdf(self):
         with open(self.file_path, encoding='utf8') as f_message:
@@ -103,14 +106,66 @@ class clean_trainset():
         return out
 
     def get_transition_lookup(self):
-        return {(i, j ): k for i, j, k in
-                zip(self.emission_df["tags"],
-                    self.emission_df["tags_next"],
-                    self.emission_df["transition_probability"])}
+        return {(i, j): k for i, j, k in
+                zip(self.transition_df["tags"],
+                    self.transition_df["tags_next"],
+                    self.transition_df["transition_probability"])}
 
+    def get_tags(self):
+        return list(set(self.transition_df["tags"]))
+
+class clean_testset():
+    def __init__(self, train_path, train_df):
+        self.train_path = train_path
+        self.raw, self.size = self.read_to_pdf()
+        self.smoothed = self.smoothingtest(train_df)
+
+    def read_to_pdf(self):
+        with open(self.train_path, encoding="utf8") as f_message:
+            temp = f_message.read().splitlines()
+
+        words = []
+        sentenceid = 0
+        for word in temp:
+            if word != "":
+                words.append([word, sentenceid])
+            else:
+                sentenceid += 1
+
+        df = pd.DataFrame(words, columns=['words', 'sentence_id'])
+
+        return df, sentenceid
+
+
+    def smoothingtest(self, train_df):
+        trainvalues = set(train_df['words'])
+        self.raw['words'] = self.raw['words'].apply(lambda word: self.replaceword(word, trainvalues))
+        return self.raw
+
+    def replaceword(self, word, train):
+        if word in train:
+            return word
+        return "#UNK#"
+
+    def get_all_sentences(self):
+        all_sentences = []
+
+        sentence = []
+        s_id = 0
+        for enum, row in self.smoothed.iterrows():
+            if row.sentence_id == s_id:
+                sentence.append(row.words)
+            else:
+                all_sentences.append(sentence)
+                sentence = [row.words]
+                s_id += 1
+        return all_sentences
 
 
 
 cleandata = clean_trainset("EN/train")
-print(cleandata.emission_df)
-print(cleandata.get_emissionlookup())
+print(cleandata.tags)
+# cleantest = clean_testset("EN/dev.in", cleandata.smoothed)
+#
+# print(cleantest.smoothed.head(50))
+# print(cleantest.get_all_sentences())
