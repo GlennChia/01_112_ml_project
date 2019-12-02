@@ -19,7 +19,7 @@ class node_k():
         return ("node({}, {}, {})".format(self.t, self.n, self.k))
 
 class viterbi():
-    def __init__(self, emission, transition, sentence, tags):
+    def __init__(self, emission, transition, sentence, tags, kbest):
         """
         :param emission: lookup of emission probabilities (dict) (tag, word) --> probability
         :param transition: lookup of transmission probbilities (dict) (tag1, tag2) --> probability
@@ -28,10 +28,12 @@ class viterbi():
         """
         self.emission = emission
         self.transition = transition
-        self.sentence = sentence.split(" ")
+        self.sentence = sentence
         self.n = len(sentence) + 2
         self.t = tags
-        self.tree_k, self.finalscore_k, self_kpaths = self.populate_tree_2(2)
+        self.kbest = kbest
+        # self.tree_k, self.finalscore_k, self_kpaths = self.populate_tree_2(2)
+        self.kth_path = self.populate_tree_2()
 
     def build_tree_2(self, k):
         """
@@ -46,24 +48,21 @@ class viterbi():
         out = np.zeros((len(self.t), 1))
         idx = 0
         for j in self.t:
-            print(j, dest_node)
             if (j, dest_node) in self.transition:
                 out[idx] = self.transition[j, dest_node]
             idx += 1
-
-        print("transition array: ", out)
         return out
 
 
 
-    def populate_tree_2(self, k_best):
+    def populate_tree_2(self):
         """
         Returns populated tree with k-best scores for each node
         :param k: choice of k-best scores
         :return: np.array of size (n, t, k). see build_tree_2 for more details.
         """
-        tree = self.build_tree_2(k_best)
-        all_nodes = [[[node_k(i, j,  k) for k in range(k_best)]for j in range(len(self.t))] for i in range(len(self.sentence))]
+        tree = self.build_tree_2(self.kbest)
+        all_nodes = [[[node_k(i, j,  k) for k in range(self.kbest)]for j in range(len(self.t))] for i in range(len(self.sentence))]
 
         for i in range(len(self.sentence) + 1):
             if i == 0:
@@ -83,11 +82,11 @@ class viterbi():
 
                 raw_scores = tree[i-1]  # extracts column (k x 1) scores in i-1
                 candidate_scores = raw_scores * self.get_transition_array("STOP")
-                max_ind = k_largest_index_argsort(candidate_scores, k_best)
+                max_ind = k_largest_index_argsort(candidate_scores, self.kbest)
                 final_score = [candidate_scores[tuple(idx)] for idx in max_ind]
 
 
-                for l in range(k_best):
+                for l in range(self.kbest):
                     last_node = node_k(i, 0, 0)
                     j_coord = max_ind[l][0]
                     k_coord = max_ind[l][1]
@@ -98,21 +97,18 @@ class viterbi():
 
             else:
                 raw_scores = tree[i-1]  # extracts column (k x 1) scores in i-1
-                print(" raw scores: ", raw_scores)
 
                 idx_k = 0
                 for k in self.t:
-                    print("in label: ", k)
                     candidate_scores = raw_scores * self.get_transition_array(k)
-                    print("candidate scores: ", candidate_scores)
-                    max_ind = k_largest_index_argsort(candidate_scores, k_best)
+                    max_ind = k_largest_index_argsort(candidate_scores, self.kbest)
 
                     if (k, self.sentence[i]) not in self.emission:
                         tree[i, idx_k] = 0
                     else:
                         tree[i, idx_k] = np.array([candidate_scores[tuple(idx)] for idx in max_ind]) * self.emission[k, self.sentence[i]]
 
-                    for l in range(k_best):
+                    for l in range(self.kbest):
                         j_coord = max_ind[l][0]
                         k_coord = max_ind[l][1]
 
@@ -155,12 +151,13 @@ emission = cleandata.emission_lookup
 transition = cleandata.transition_lookup
 
 for sentence in cleantest.get_all_sentences():
-    obj = viterbi(emission, transition, sentence, cleandata.tags)
-    pred_tags = obj.populate_tree_2(1)
+    obj = viterbi(emission, transition, sentence, cleandata.tags, 1)
+    pred_tags = obj.populate_tree_2()
+    print(pred_tags)
     with open("EN/dev.p4.out", "a") as f:
         count = 0
         for word in sentence:
-            f.write("word " + pred_tags[0] + "\n")
+            f.write(word + " " + pred_tags[count] + "\n")
             count += 1
         f.write("\n")
 
