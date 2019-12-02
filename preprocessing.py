@@ -1,4 +1,6 @@
 import pandas as pd
+import copy
+import numpy as np
 
 
 class clean_trainset():
@@ -6,8 +8,10 @@ class clean_trainset():
         self.file_path = file_path
         self.raw = self.readtopdftrain()
         self.smoothed = self.smoothingtrain()
-        self.emission_df = self.estimate_emission_parameters()
-        self.emission_lookup = self.get_emissionlookup()
+        # self.emission_df = self.estimate_emission_parameters()
+        # self.emission_lookup = self.get_emissionlookup()
+        # self.transition_df = self.estimate_transition_parameters()
+        # self.transition_lookup =
 
 
     def readtopdftrain(self):
@@ -57,6 +61,28 @@ class clean_trainset():
         lookup = dict(zip(argmax_emission.words, argmax_emission.tags))
         return lookup
 
+    def estimate_transition_parameters(self):
+        """Return a dataframe with
+        tag | next_tag | count_tag | count_transition | transition_prob
+
+        Parameters:
+        df (DataFrame): Dataframe with word, tags, tags_next
+
+        Returns:
+        df (DataFrame)
+        """
+        out = copy.copy(self.smoothed)
+        out['count_tag'] = out.groupby(['tags']).tags.transform(np.size)
+        out['count_transition'] = out.groupby(['tags', 'tags_next']).tags.transform(np.size)
+        out.loc[out.tags_next == '', 'count_transition'] = 0
+        out['transition_probability'] = out['count_transition'] / out['count_tag']
+        out = out.drop_duplicates(subset=['tags', 'tags_next'])
+        out = out.drop(['words'], axis=1)
+        out = out.sort_values(['tags', 'tags_next'])
+        out = out.reset_index()
+        out = out.drop(['index'], axis=1)
+        return out
+
 
 cleandata = clean_trainset("EN/train")
-print(cleandata.emission_lookup)
+print(cleandata.smoothed)
