@@ -144,21 +144,26 @@ class viterbi():
 # print(test.populate_tree_2(2))
 
 
-cleandata = preprocessing.clean_trainset("EN/train")
-cleantest = preprocessing.clean_testset("EN/dev.in", cleandata.smoothed)
 
-emission = cleandata.emission_lookup
-transition = cleandata.transition_lookup
 
-for sentence in cleantest.get_all_sentences():
-    obj = viterbi(emission, transition, sentence, cleandata.tags, 1)
-    pred_tags = obj.populate_tree_2()
-    print(pred_tags)
-    with open("EN/dev.p4.out", "a") as f:
-        count = 0
-        for word in sentence:
-            f.write(word + " " + pred_tags[count] + "\n")
-            count += 1
-        f.write("\n")
 
+def run_test(dataset):
+    cleandata = preprocessing.clean_trainset(dataset + "/train")
+    cleantest = preprocessing.clean_testset(dataset + "/dev.in", cleandata.smoothed)
+
+    emission = cleandata.emission_lookup
+    transition = cleandata.transition_lookup
+    for sentence in cleantest.get_all_sentences():
+        obj = viterbi(emission, transition, sentence, cleandata.tags, 7)
+        pred_tags = obj.populate_tree_2()
+        print(pred_tags)
+        with open(dataset + "/dev.p4.out", "a", encoding="utf8") as f:
+            count = 0
+            for word in sentence:
+                f.write(word + " " + pred_tags[count] + "\n")
+                count += 1
+            f.write("\n")
+#
+for d in ["CN", "AL", "SG"]:
+    run_test(d)
 
