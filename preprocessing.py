@@ -164,9 +164,8 @@ class clean_testset():
 
 
 
-cleandata = clean_trainset("EN/train")
-# print(cleandata.tags)
-cleantest = clean_testset("EN/dev.in", cleandata.smoothed)
+# cleandata = clean_trainset("EN/train")
+# cleantest = clean_testset("EN/dev.in", cleandata.smoothed)
 
-print(cleantest.smoothed)
-print(cleantest.get_all_sentences()[-1])
+# print(cleantest.smoothed)
+# print(cleantest.get_all_sentences()[-1])
