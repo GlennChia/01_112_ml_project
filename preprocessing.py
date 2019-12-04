@@ -159,13 +159,14 @@ class clean_testset():
                 all_sentences.append(sentence)
                 sentence = [row.words]
                 s_id += 1
+        all_sentences.append(sentence)
         return all_sentences
 
 
 
 cleandata = clean_trainset("EN/train")
-print(cleandata.tags)
-# cleantest = clean_testset("EN/dev.in", cleandata.smoothed)
-#
-# print(cleantest.smoothed.head(50))
-# print(cleantest.get_all_sentences())
+# print(cleandata.tags)
+cleantest = clean_testset("EN/dev.in", cleandata.smoothed)
+
+print(cleantest.smoothed)
+print(cleantest.get_all_sentences()[-1])
