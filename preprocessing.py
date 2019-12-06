@@ -6,28 +6,49 @@ import numpy as np
 class clean_trainset():
     def __init__(self, file_path):
         self.file_path = file_path
-        self.raw = self.readtopdftrain()
+        self.raw = self.read_to_pdf()
         self.smoothed = self.smoothingtrain()
-        # self.emission_df = self.estimate_emission_parameters()
-        # self.emission_lookup = self.get_emissionlookup()
-        # self.transition_df = self.estimate_transition_parameters()
-        # self.transition_lookup =
+
+        self.emission_df = self.estimate_emission_parameters()
+        self.emission_lookup = self.get_emissionlookup()
+
+        self.transition_df = self.estimate_transition_parameters()
+        self.transition_lookup = self.get_transition_lookup()
+
+        self.tags = self.get_tags()
 
 
-    def readtopdftrain(self):
-        with open(self.file_path, encoding="utf8") as f_message:
+    def read_to_pdf(self):
+        with open(self.file_path, encoding='utf8') as f_message:
             temp = f_message.read().splitlines()
-            temp = list(filter(None, temp))
-        separated_word_tags = [word_tags.split(' ') for word_tags in temp]
-        # separated_word_tags = [word.strip() for l in separated_word_tags for word in l]
-        df = pd.DataFrame(separated_word_tags, columns=['words', 'tags'])
-        df["words"] = [i.strip() for i in df.words]
+        words = []
+        tags = []
+        for index, word_tags in enumerate(temp):
+            if index == 0:
+                words.append('')
+                tags.append('START')
+            elif index == len(temp) - 1:
+                words.append('')
+                tags.append('STOP')
+            elif word_tags == '':
+                words.append('')
+                tags.append('STOP')
+                words.append('')
+                tags.append('START')
+            else:
+                split_word_tags = word_tags.split(' ')
+                words.append(split_word_tags[0])
+                tags.append(split_word_tags[1])
+        tags_next = tags[1:]
+        df = pd.DataFrame(list(zip(words, tags, tags_next)), columns=['words', 'tags', 'tags_next'])
+        df['tags_next'] = df['tags_next'].str.replace('START', '')
         return df
 
     def replaceword(self, word, word_counts, k):
         if word_counts[word] < k:
             return "#UNK#"
         return word
+
 
     def smoothingtrain(self, k=3):
         word_counts = self.raw['words'].value_counts().to_dict()
@@ -41,6 +62,7 @@ class clean_trainset():
         :param df: raw word to tag map
         :return: columns = count of word, count of tags, all emission probabilites of tag --> word
         """
+
         count_emit = self.smoothed.groupby(['tags', 'words']).size().reset_index()
         count_emit.columns = ["tags", "words", "count_emit"]
         count_tags = self.smoothed.groupby(["tags"]).size().reset_index()
@@ -56,10 +78,10 @@ class clean_trainset():
         :param argmax_emission: Dataframe with emission probabilities of each tag --> word
         :return: Dictionary of word --> highest e(x|y) tag
         """
-        idx = self.emission_df.groupby(['words'])['emission'].transform(max) == self.emission_df['emission']
-        argmax_emission = self.emission_df[idx]
-        lookup = dict(zip(argmax_emission.words, argmax_emission.tags))
-        return lookup
+        return {(i, j ): k for i, j, k in
+                zip(self.emission_df["tags"],
+                    self.emission_df["words"],
+                    self.emission_df["emission"])}
 
     def estimate_transition_parameters(self):
         """Return a dataframe with
@@ -83,6 +105,67 @@ class clean_trainset():
         out = out.drop(['index'], axis=1)
         return out
 
+    def get_transition_lookup(self):
+        return {(i, j): k for i, j, k in
+                zip(self.transition_df["tags"],
+                    self.transition_df["tags_next"],
+                    self.transition_df["transition_probability"])}
+
+    def get_tags(self):
+        return list(set(self.transition_df["tags"]))
+
+class clean_testset():
+    def __init__(self, train_path, train_df):
+        self.train_path = train_path
+        self.raw, self.size = self.read_to_pdf()
+        self.smoothed = self.smoothingtest(train_df)
+
+    def read_to_pdf(self):
+        with open(self.train_path, encoding="utf8") as f_message:
+            temp = f_message.read().splitlines()
+
+        words = []
+        sentenceid = 0
+        for word in temp:
+            if word != "":
+                words.append([word, sentenceid])
+            else:
+                sentenceid += 1
+
+        df = pd.DataFrame(words, columns=['words', 'sentence_id'])
+
+        return df, sentenceid
+
+
+    def smoothingtest(self, train_df):
+        trainvalues = set(train_df['words'])
+        self.raw['words'] = self.raw['words'].apply(lambda word: self.replaceword(word, trainvalues))
+        return self.raw
+
+    def replaceword(self, word, train):
+        if word in train:
+            return word
+        return "#UNK#"
+
+    def get_all_sentences(self):
+        all_sentences = []
+
+        sentence = []
+        s_id = 0
+        for enum, row in self.smoothed.iterrows():
+            if row.sentence_id == s_id:
+                sentence.append(row.words)
+            else:
+                all_sentences.append(sentence)
+                sentence = [row.words]
+                s_id += 1
+        all_sentences.append(sentence)
+        return all_sentences
+
+
 
 cleandata = clean_trainset("EN/train")
-print(cleandata.smoothed)
+cleantest = clean_testset("EN/dev.in", cleandata.smoothed)
+
+print(cleantest.smoothed)
+print(cleantest.get_all_sentences()[-1])
