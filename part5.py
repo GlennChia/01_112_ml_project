@@ -31,7 +31,7 @@ def get_structured_perceptron_path(tags, sentence, weights):
     """ Get the best path from START to STOP as we go along
 
     Parameters:
-        tags (list): All tags in the dataset
+        tags (list of str): All tags in the dataset
         sentence (list of str): Words for a specific sentence
         weights (defaultdict): Emissions, transtions and their weights
 
@@ -40,7 +40,8 @@ def get_structured_perceptron_path(tags, sentence, weights):
 
     """
     # tags.insert(0,'START')
-    tags.pop(0)
+    # tags.pop(0)
+    tags.remove('START')
     store_scores = np.zeros((len(tags), len(sentence)))
     predicted_sequence = []
     for index_words, word in enumerate(sentence):
