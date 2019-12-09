@@ -23,6 +23,59 @@ Project for SUTD 01.112 Machine Learning Fall 2019
 
 ### 2.2.3 Part 2 Question 3: Simple Sentiment Analysis System
 
+## 2.2 Part 3 
+
+### 2.2.1 Write a function that estimates the transition parameters from the training set using MLE (maximum likelihood estimation): Consider special cases for STOP and START
+
+
+
+### 2.2.2 Use the estimated transition and emission parameters, implement the Viterbi algorithm to compute the following (for a sentence with n words): Tag sequence
+
+The algorithm is the same as what we were taught in class 
+
+<u>**Step 1: Initializing the tree**</u>
+
+![](assets/p3b1_init_all.PNG)
+
+![](assets/p3b2_init_start.PNG)
+
+We first initialize all the scores to be zero other than the first score as per the formula
+
+- $\pi(0,u) = 1$ if u = START
+- $\pi(0,u) = 0$ otherwise
+
+Step 2: Considering the layer after the START node 
+
+![](assets/p3b3_start.PNG)
+
+For the first layer, the only node that it transitions from is the START node, hence there is only one possible score for each node and the formula used is $\pi(0,START) \cdot b_{u}(x_{1}) \cdot a_{START,u}$. Hence we don't need to do a max function
+
+<u>**Step 3: Between the START and STOP nodes**</u>
+
+<img src="assets/p3b4_middle.PNG" style="zoom:67%;" />
+
+We iterate through the layers and for each layer, we look at each node. For each node, we compute the scores based on the score from the previous nodes multiplied by the transition probabilities from  the previous node to the current node, multiplied by the emission probabilities of the current node. This gives us a list of scores from the nodes from the previous layer to the current node. Subsequently, we find the max of the score in the list and get its index. The index corresponds to the node from the previous layer that produced the best score for each node in the current layer. Since the node corresponds to the tag, we essentially have the best tag from the previous layer from each node. We store this tag in the current node. We also store the identity of the previous node that produced this tag.
+
+This follows the formula taught in class
+
+$max_{v}\{\pi(j,v) \cdot b_{u}(x_{j+1}) \cdot a_{v,u}\}$
+
+**<u>Step 4: At the STOP node at layer n+1</u>**
+
+![](assets/p3b5_stop.PNG)
+
+We reached the last layer which only has the STOP node. We compute the scores based on the score from the previous nodes (in layer n) multiplied by the transition probabilities from  the previous node to the STOP node. This gives us a list of scores from the nodes from the previous layer to the STOP node. Subsequently, we find the max of the score in the list and get its index. The index corresponds to the node from the previous layer that produced the best score to the STOP node. Since the node from the previous layer stores the best path up to itself, if the final score at the STOP node is highest, this guarantees that it is the best path. We then store the tag corresponding to the previous node. We also store the identity of the node that produced this tag.
+
+This follows the formula taught in class
+
+$max_{v}\{\pi(n,v) \cdot a_{v,STOP}\}$
+
+<u>**STEP 5: Working out the path**</u>
+
+![](assets/p3b6_path.PNG)
+
+Since each node stores the best tag of the previous layer, we start from the STOP node and work backwards. The STOP node (which is at layer n+1) will get the tag from layer n. Since we also store the node that produce the best tag, we can use it to find its parent and the associated tag. Working backwards will thus help us find the best path which is the tag sequence. 
+
 
 
 ## 2.3 Part 4: Implement an algorithm to find the 7-th best output sequences. Clearly describe the steps of your algorithm in your report.
@@ -82,4 +135,5 @@ At this stage, we have a completed (n, t, 7) ndarray of Node() objects. We use t
 
 Using the 7th best score from the last layer, we implement a simple backtrack to get the tags of each node's parent. We append the tag of last node's parent (already stored in the node from previous iteration of modified viterbi) to a path. We then find this node's parent and do to same by inserting its tag at the front of this path. This is done from layer n+1 to layer 1, and the 7th best path is generated. 
 
+### 2.3.3 Results
 
