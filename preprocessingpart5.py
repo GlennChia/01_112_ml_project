@@ -69,6 +69,7 @@ class clean_trainset():
             else:
                 output.append(sentence)
                 sentence = []
+                sentence.append((row[1], row[2]))
                 sentenceid += 1
         return output
 
@@ -129,4 +130,4 @@ class clean_testset():
 cleandata = clean_trainset("EN/train")
 cleantest = clean_testset("EN/dev.in", cleandata.smoothed)
 
-print(cleandata.outputsmootheddata())
+# print(cleandata.outputsmootheddata()[0:4])
