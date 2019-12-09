@@ -43,6 +43,8 @@ We let PATH(j,u)[k] where `j` is the current layer and `u` is the current node i
 
 <u>**Step 1: Initializing the tree**</u>
 
+To initialise the tree, we instantiate a (n, t, 7) 3D-array with a custom NODE datatype, where n = # of words in the sentence and t = # of tags. Each (n, t) represents a node in the traditional viterbi tree, and each node u is expanded to an array of size 7 to store the 7 best nodes (score, parent, tag) from START to node u. The node datatype in each position stores the score from START to u, as well as the parent node that produced this score, and its corresponding output tag. This is done so backtracking can be done efficiently to find the full path eventually. 
+
 **Step 1a: Consider the start layer.**
 
 We initialize the best score of the start layer to be 1.0
@@ -59,7 +61,8 @@ The paths stored at this stage are PATH(0,START)[0] = START and the rest of the 
 
 <u>**Step 2: Consider the nodes between START and STOP**</u> 
 
-For each node in layer `j+1` we find all the scores from the previous layer to this node by taking $\pi(j+1,u)[h]*a_{v,u}*b_{u}(x_{j+1})$ for every node `v` in the previous layer `j` and every score in node `v`'s score array. We then have all the scores.  We then sort the scores and find the best 7 score. We store the 7 best scores in $\pi(j+1,u)[h]$ for h=0 to h=6. To find the path, we find the previous nodes which produced the best 7 scores and append the current node's name (tag) to the PATH from the previous node.
+For each node in layer `j+1` we find all the scores from the previous layer to this node by taking $\pi(j+1,u)[h]*a_{v,u}*b_{u}(x_{j+1})$ for every node `v` in the previous layer `j` and every score in node `v`'s score array. We then have all the scores.  We then find the best 7 scores and store the indexes of these 7 scores. The indexes give us useful information of which score in which node produced that particular score. In order words, this tells us the node's parent and corresponding tag. We store the 7 best nodes in $\pi(j+1,u)[h]$ for h=0 to h=6. 
+
 
 PATH(j+1, u)[h] = PATH(j, v))[Index which produced one of the 7 best scores] + (v -> u) 
 
@@ -67,10 +70,15 @@ where `v` is the previous node in layer `j` with its respective index that produ
 
 <u>**Step 3: Consider the STOP node at layer n+1**</u>
 
-We compute all the scores from the previous layer n to this node by doing $\pi(n,u)[h]*a_{u,STOP}$ for all nodes u in the previous layer and the 7 scores stored in each node. We now have all the scores. We then sort the scores and find the 7th best score.
+We compute all the scores from the previous layer n to this node by doing $\pi(n,u)[h]*a_{u,STOP}$ for all nodes u in the previous layer and the 7 scores stored in each node. We now have all the scores. We now find the 7 best scores and store corresponding parent and tag information into the a Node() object. 
 
 Assume node q's third score is the overall 7th best score, we have
 
 PATH(n+1, STOP)[7] = PATH(n, q))[3] + (q -> STOP)
 
-This is the 7th best path where we take node q's third best path and append STOP to it
+<u>**Step 4: Get 7th best path**</u>
+At this stage, we have a completed (n, t, 7) ndarray of Node() objects. We use this array and the final array of 7 best scores for the last STOP layer to find the best 7 path. Take note that each Node() object contains a pointer to its parent and corresponding tag. 
+
+Using the 7th best score from the last layer, we implement a simple backtrack to get the tags of each node's parent. We append the tag of last node's parent (already stored in the node from previous iteration of modified viterbi) to a path. We then find this node's parent and do to same by inserting its tag at the front of this path. This is done from layer n+1 to layer 1, and the 7th best path is generated. 
+
+
