@@ -78,7 +78,7 @@ PATH(n+1, STOP)[7] = PATH(n, q))[3] + (q -> STOP)
 
 <u>**Step 4: Get 7th best path**</u>
 
-At this stage, we have a completed (n, t, 7) ndarray of Node() objects. We use this array and the final array of 7 best scores for the last STOP layer to find the best 7 path. Take note that each Node() object contains a pointer to its parent and corresponding tag. 
+At this stage, we have a completed (n, t, 7) ndarray of Node() objects. We use this array and the final array of 7 best scores from the last STOP layer to find the 7th best path. Take note that each Node() object contains a pointer to its parent and corresponding tag. 
 
 Using the 7th best score from the last layer, we implement a simple backtrack to get the tags of each node's parent. We append the tag of last node's parent (already stored in the node from previous iteration of modified viterbi) to a path. We then find this node's parent and do to same by inserting its tag at the front of this path. This is done from layer n+1 to layer 1, and the 7th best path is generated. 
 
