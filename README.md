@@ -16,6 +16,12 @@ To only run on selected datasets, comment out appropriate in `lines 125-128`.
 The output file will be <name of dataset e.g. EN/AL/CN/SG>/dev.p2.out.
 
 ## 1.2 Part 3
+(A) Transition parameters
+File to run: `part3.py`
+If you are using the command line, run the commands: 'python part3.py'
+A dataframe of transition parameters should be printed on console
+
+(B) Viterbi 
 File to run: `part3_viterbi.py`
 
 If you are using the command line, run the commands: 'python part3_viterbi.py'
