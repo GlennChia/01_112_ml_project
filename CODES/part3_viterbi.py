@@ -144,7 +144,7 @@ def run_dev(dataset):
     emission = cleandata.emission_lookup
     transition = cleandata.transition_lookup
     for sentence in cleantest.get_all_sentences():
-        obj = viterbi(emission, transition, sentence, cleandata.tags, 7)
+        obj = viterbi(emission, transition, sentence, cleandata.tags, 1)
         pred_tags = obj.populate_tree_2()
         with open(dataset + "/dev.p4.out", "a", encoding="utf8") as f:
             count = 0
@@ -174,7 +174,5 @@ def run_test(dataset):
 for d in ["EN", "AL", "CN", "SG"]:
     run_dev(d)
 
-# running viterbi for test files
-for d in ["EN", "AL"]:
-    run_test(d)
+
 

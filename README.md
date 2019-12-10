@@ -16,11 +16,11 @@ To only run on selected datasets, comment out appropriate in `lines 125-128`.
 The output file will be <name of dataset e.g. EN/AL/CN/SG>/dev.p2.out.
 
 ## 1.2 Part 3
-File to run: `viterbi_class.py`
+File to run: `part3_viterbi.py`
 
-If you are using the command line, run the commands: 'python viterbi_class.py'
+If you are using the command line, run the commands: 'python part3_viterbi.py'
 Take note that running this file will generate ALL output files for EN, CN, AL and SG. 
-To only run on selected files, comment out and/edit `lines 265-266`. 
+To only run on selected files, comment out and/edit `lines 174-175`. 
 The output file will be <name of dataset e.g. EN/AL/CN/SG>/dev.p3.out.
 
 ## 1.3 Part 4
