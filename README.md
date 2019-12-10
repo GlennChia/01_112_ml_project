@@ -249,10 +249,10 @@ viterbi, we are more likely to encounter smaller emission and transition probabi
 
 The output files from log calculations are found in dev_log.pX.out for x = 3, 4. 
 
-## 2.5
+## 2.4 Part 5: Design challenge
 
 For the design challenge, we tried two different approaches: Structured Perceptron Algorithm and Average Perceptron Algorithm. 
-### 2.5.1 Structured Perceptron
+### 2.4.1 Structured Perceptron
 We created a `StructuredPerceptron` class where we initialised a weights of type dictionary, the number of iterations to run through the sentences for, as well as training data, the output file path and all the possible tags from the training data. <br/>
 ![](assets/part5structuredperceptroninit.PNG)
 
@@ -286,7 +286,6 @@ The code for the function is below:
 
 The <b>Viterbi</b> algorithm for the structured perceptron is as follows:
 
-
 The code is as follows:
 ![](assets/part5getstructuredperceptronpath.PNG)
 
@@ -304,7 +303,7 @@ The limitations of our implementation are:
 
 We will address these implementations in our next implementation, averaged perceptron.
 
-### 2.5.2 Average Perceptron
+### 2.4.2 Average Perceptron
 ![](assets/part5averageparametersequation.jpg)
 
 $\gamma_{s} = \frac{\sum_{t=1...T,i=1...n}\alpha_{s}^{t,i}}{nT}$
@@ -313,7 +312,7 @@ According to the literature provided in the project description, the averaging m
 
 
 
-### 2.5.3 Average Perceptron Results
+### 2.4.3 Average Perceptron Results
 Below are the results from running the average perceptron code: <br/>
 
 For EN and then AL dataset:
