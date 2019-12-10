@@ -70,10 +70,8 @@ class viterbi():
                 for j in self.t:
                     if ("START", j) not in self.transition or (j, self.sentence[0]) not in self.emission:
                         tree[i, idx, 0] = 0
-                        # all_nodes[idx][i][0].score = 0
                     else:
                         tree[i, idx, 0] = self.transition[("START", j)] * self.emission[(j, self.sentence[0])]
-                        # all_nodes[idx][i][0] = self.transition[("START", j)] * self.emission[(j, self.sentence[0])]
                     idx += 1
 
 
@@ -149,15 +147,19 @@ print("2nd best: ", test2.populate_tree_2())
 
 
 def run_test(dataset):
+    # cleandata = preprocessing.clean_trainset(dataset + "/train")
+    # cleantest = preprocessing.clean_testset(dataset + "/dev.in", cleandata.smoothed)
+
     cleandata = preprocessing.clean_trainset(dataset + "/train")
-    cleantest = preprocessing.clean_testset(dataset + "/dev.in", cleandata.smoothed)
+    cleantest = preprocessing.clean_testset("Test/" + dataset + "/test.in", cleandata.smoothed)
+
 
     emission = cleandata.emission_lookup
     transition = cleandata.transition_lookup
     for sentence in cleantest.get_all_sentences():
         obj = viterbi(emission, transition, sentence, cleandata.tags, 1)
         pred_tags = obj.populate_tree_2()
-        with open(dataset + "/dev.p4.out", "a", encoding="utf8") as f:
+        with open("Test/" + dataset + "/test.out", "a", encoding="utf8") as f:
             count = 0
             for word in sentence:
                 f.write(word + " " + pred_tags[count] + "\n")
@@ -167,4 +169,4 @@ def run_test(dataset):
 # for d in ["EN", "CN", "AL", "SG"]:
 #     run_test(d)
 
-# run_test("EN")
+run_test("AL")
