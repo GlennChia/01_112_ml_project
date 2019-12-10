@@ -137,33 +137,34 @@ class viterbi():
         # return tree, final_score, k_paths
         return kth_path
 
-# transition_lookup = {("START", "A"): 1.0, ("A", "A"): 0.5 , ("A", "B"): 0.5, ("B", "B"): 0.8, ("B", "STOP"): 0.2}
-# emission_lookup = {("A", "the"): 0.9, ("A", "dog"): 0.1, ("B", "the"): 0.1, ("B", "dog"): 0.9}
+transition_lookup = {("START", "A"): 1.0, ("A", "A"): 0.5 , ("A", "B"): 0.5, ("B", "B"): 0.8, ("B", "STOP"): 0.2}
+emission_lookup = {("A", "the"): 0.9, ("A", "dog"): 0.1, ("B", "the"): 0.1, ("B", "dog"): 0.9}
 # sentence = "the dog the"
-# test = viterbi(emission_lookup, transition_lookup, sentence, ["A", "B"])
-# print(test.populate_tree_2(2))
+sentence = ["the", "dog", "the"]
+test = viterbi(emission_lookup, transition_lookup, sentence, ["A", "B"], 2)
+print(test.populate_tree_2())
 
 
 
 
 
-def run_test(dataset):
-    cleandata = preprocessing.clean_trainset(dataset + "/train")
-    cleantest = preprocessing.clean_testset(dataset + "/dev.in", cleandata.smoothed)
-
-    emission = cleandata.emission_lookup
-    transition = cleandata.transition_lookup
-    for sentence in cleantest.get_all_sentences():
-        obj = viterbi(emission, transition, sentence, cleandata.tags, 7)
-        pred_tags = obj.populate_tree_2()
-        print(pred_tags)
-        with open(dataset + "/dev.p4.out", "a", encoding="utf8") as f:
-            count = 0
-            for word in sentence:
-                f.write(word + " " + pred_tags[count] + "\n")
-                count += 1
-            f.write("\n")
+# def run_test(dataset):
+#     cleandata = preprocessing.clean_trainset(dataset + "/train")
+#     cleantest = preprocessing.clean_testset(dataset + "/dev.in", cleandata.smoothed)
 #
-for d in ["EN", "CN", "AL", "SG"]:
-    run_test(d)
+#     emission = cleandata.emission_lookup
+#     transition = cleandata.transition_lookup
+#     for sentence in cleantest.get_all_sentences():
+#         obj = viterbi(emission, transition, sentence, cleandata.tags, 7)
+#         pred_tags = obj.populate_tree_2()
+#         print(pred_tags)
+#         with open(dataset + "/dev.p4.out", "a", encoding="utf8") as f:
+#             count = 0
+#             for word in sentence:
+#                 f.write(word + " " + pred_tags[count] + "\n")
+#                 count += 1
+#             f.write("\n")
+# #
+# for d in ["EN", "CN", "AL", "SG"]:
+#     run_test(d)
 
