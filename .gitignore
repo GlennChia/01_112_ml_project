@@ -105,7 +105,3 @@ venv.bak/
 
 # zip
 *.zip
-.idea/01_112_ml_project.iml
-.idea/modules.xml
-.idea/vcs.xml
-.idea/workspace.xml
