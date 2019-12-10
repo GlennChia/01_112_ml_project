@@ -1,7 +1,7 @@
 import pandas as pd
 import copy
 import numpy as np
-
+import re
 
 class clean_trainset():
     def __init__(self, file_path):
@@ -50,10 +50,31 @@ class clean_trainset():
     def replaceword(self, word, word_counts, k):
         if word_counts[word] < k:
             return "#UNK#"
+        re_punc = r'^[^a-zA-Z0-9]+$'
+        re_hash = r'^#'
+        re_at = r'^@'
+        re_num = r'\d'
+        re_url = r'(^http:|\.com$)'
+
+        puncpattern = re.compile(re_punc)
+        hashpattern = re.compile(re_hash)
+        atpattern = re.compile(re_at)
+        numpattern = re.compile(re_num)
+        urlpattern = re.compile(re_url)
+        if puncpattern.match(word):
+            return 'PUNC'
+        elif hashpattern.match(word):
+            return 'HASH'
+        elif atpattern.match(word):
+            return 'AT'
+        elif numpattern.match(word):
+            return 'NUM'
+        elif urlpattern.match(word):
+            return 'URL'
         return word
 
 
-    def smoothingtrain(self, k=3):
+    def smoothingtrain(self, k=2):
         word_counts = self.raw['words'].value_counts().to_dict()
         self.raw['words'] = self.raw['words'].apply(lambda word: self.replaceword(word, word_counts, k))
         return self.raw
@@ -65,11 +86,11 @@ class clean_trainset():
         sentenceid = 0
         for row in self.smoothed.itertuples():
             if row[4] == sentenceid:
-                sentence.append((row[1], row[2]))
+                if row[2] != 'START':
+                    sentence.append((row[1], row[2]))
             else:
                 output.append(sentence)
                 sentence = []
-                sentence.append((row[1], row[2]))
                 sentenceid += 1
         return output
 
@@ -106,6 +127,27 @@ class clean_testset():
         return self.raw
 
     def replaceword(self, word, train):
+        re_punc = r'^[^a-zA-Z0-9]+$'
+        re_hash = r'^#'
+        re_at = r'^@'
+        re_num = r'\d'
+        re_url = r'(^http:|\.com$)'
+
+        puncpattern = re.compile(re_punc)
+        hashpattern = re.compile(re_hash)
+        atpattern = re.compile(re_at)
+        numpattern = re.compile(re_num)
+        urlpattern = re.compile(re_url)
+        # if puncpattern.match(word):
+        #     return 'PUNC'
+        if hashpattern.match(word):
+            return 'HASH'
+        elif atpattern.match(word):
+            return 'AT'
+        elif numpattern.match(word):
+            return 'NUM'
+        elif urlpattern.match(word):
+            return 'URL'
         if word in train:
             return word
         return "#UNK#"
@@ -131,3 +173,4 @@ cleandata = clean_trainset("EN/train")
 cleantest = clean_testset("EN/dev.in", cleandata.smoothed)
 
 # print(cleandata.outputsmootheddata()[0:4])
+# print(cleantest.get_all_sentences())
