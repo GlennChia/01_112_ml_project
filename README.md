@@ -11,7 +11,12 @@ Project for SUTD 01.112 Machine Learning Fall 2019
 
 ## 1.4 Part 5
 
+![](assets/instructions_part5.PNG)
 
+There are 2 parts to part 5. 
+
+- The first 2 uncommented lines run the code for part 5a
+- The second 2 uncommented lines run the code for the test data which we cannot see the results for
 
 # 2. Explaining the code
 
@@ -250,7 +255,7 @@ The <b>training</b> algorithm for the structured perceptron that we implemented 
 The code for the function is below:
 ![](assets/part5trainpt1.PNG)
 ![](assets/part5trainpt2.PNG)
- 
+
 
 The <b>update of weights</b> algorithm: 
 1. Iterate through the feature vector of the actual sentence and do the following:
@@ -288,12 +293,18 @@ We will address these implementations in our next implementation, averaged perce
 ### 2.5.2 Average Perceptron
 ![](assets/part5averageparametersequation.jpg)
 
+$\gamma_{s} = \frac{\sum_{t=1...T,i=1...n}\alpha_{s}^{t,i}}{nT}$
+
+According to the literature provided in the project description, the averaging method has been proven to achieve better accuracy. We this added it on top of our existing structured perceptron. We also permutated various features to find the ideal combination of features (We commented out the features that led to a decrease in accuracy). A naive approach would be for each word in the training set, we look at all the features for every word and add it cumulatively. However, this would mean be computationally expensive. Hence, instead, we keep a global count of the total number of updates and a count for when each word's features were updated. Whenever that word is updated, we update the "global weight" of the that word by taking the product of the difference in total time and timestamp multiplied by the weight before the update. After this, we then update the weight according to the standard structured perceptron. Subsequently, at the end of all iterations, we have the global count of the number of updates and we also have the accumulated weight over all words and iterations. A simple division as per the formula above gets the averaged weight which is proven to be more accurate than just using the final weight given by a "structured perceptron" method.
+
+
+
 ### 2.5.3 Average Perceptron Results
 Below are the results from running the average perceptron code: <br/>
 
 For EN and then AL dataset:
 ![](assets/part5results.jpg)
- 
+
 
 ## References
 - Collins, M. (2002). Discriminative training methods for hidden Markov models. Proceedings of the ACL-02 Conference on Empirical Methods in Natural Language Processing - EMNLP 02. doi: 10.3115/1118693.1118694
