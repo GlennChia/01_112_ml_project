@@ -71,16 +71,6 @@ class clean_trainset():
         #     return 'NUM'
         # elif urlpattern.match(word):
         #     return 'URL'
-        if word == '':
-            return word
-
-        if '-' in word and word[0] != '-':
-            return 'HYPHEN'
-        elif word.isdigit() and len(word) == 4:
-            return 'YEAR'
-        elif word[0].isdigit():
-            return 'DIGITS'
-
         return word
 
 
@@ -137,26 +127,17 @@ class clean_testset():
         return self.raw
 
     def replaceword(self, word, train):
-        re_punc = r'^[^a-zA-Z0-9]+$'
-        re_hash = r'^#'
-        re_at = r'^@'
-        re_num = r'\d'
-        re_url = r'(^http:|\.com$)'
+        # re_punc = r'^[^a-zA-Z0-9]+$'
+        # re_hash = r'^#'
+        # re_at = r'^@'
+        # re_num = r'\d'
+        # re_url = r'(^http:|\.com$)'
 
         # puncpattern = re.compile(re_punc)
         # hashpattern = re.compile(re_hash)
         # atpattern = re.compile(re_at)
         # numpattern = re.compile(re_num)
         # urlpattern = re.compile(re_url)
-        if word == '':
-            return word
-
-        if '-' in word and word[0] != '-':
-            return 'HYPHEN'
-        elif word.isdigit() and len(word) == 4:
-            return 'YEAR'
-        elif word[0].isdigit():
-            return 'DIGITS'
         if word in train:
             return word
         return "#UNK#"
@@ -175,11 +156,3 @@ class clean_testset():
                 s_id += 1
         all_sentences.append(sentence)
         return all_sentences
-
-
-
-cleandata = clean_trainset("EN/train")
-cleantest = clean_testset("EN/dev.in", cleandata.smoothed)
-
-print(cleandata.outputsmootheddata()[0:4])
-print(cleantest.get_all_sentences())
