@@ -75,11 +75,11 @@ class clean_trainset():
             return word
 
         if '-' in word and word[0] != '-':
-            return '!HYPHEN'
+            return 'HYPHEN'
         elif word.isdigit() and len(word) == 4:
-            return '!YEAR'
+            return 'YEAR'
         elif word[0].isdigit():
-            return '!DIGITS'
+            return 'DIGITS'
 
         return word
 
