@@ -135,18 +135,9 @@ class viterbi():
         # return tree, final_score, k_paths
         return kth_path
 
-transition_lookup = {("START", "A"): 1.0, ("A", "A"): 0.5 , ("A", "B"): 0.5, ("B", "B"): 0.8, ("B", "STOP"): 0.2}
-emission_lookup = {("A", "the"): 0.9, ("A", "dog"): 0.1, ("B", "the"): 0.1, ("B", "dog"): 0.9}
-sentence = ["the", "dog", "the"]
-# test = viterbi(emission_lookup, transition_lookup, sentence, ["A", "B"], 1)
-# test2 = viterbi(emission_lookup, transition_lookup, sentence, ["A", "B"], 2)
-
-# print("1st best : ", test.populate_tree_2())
-# print("2nd best: ", test2.populate_tree_2())
 
 
-
-def run_test(dataset):
+def run_dev(dataset):
     cleandata = preprocessing.clean_trainset(dataset + "/train")
     cleantest = preprocessing.clean_testset(dataset + "/dev.in", cleandata.smoothed)
 
@@ -165,13 +156,28 @@ def run_test(dataset):
                 count += 1
             f.write("\n")
 
-    # sentence = ["Californians", ",", "meanwhile", ",", "tried", "to", "#UNK#", "with", "#UNK#", "services", ",",
-    #             "blocked","roadways", "and", "water", "shortages","in", "the","aftermath","of","the", "tremor", "that",
-    #             "left", "scores",  "dead","and", "#UNK#", "."]
-    # obj = viterbi(emission, transition, sentence, cleandata.tags, 1)
-    # pred_tags = obj.populate_tree_2()
-    # print(pred_tags)
-#
-for d in ["EN", "CN", "AL", "SG"]:
+def run_test(dataset):
+    cleandata = preprocessing.clean_trainset(dataset + "/train")
+    cleantest = preprocessing.clean_testset("Test/" + dataset + "/test.in", cleandata.smoothed)
+
+    emission = cleandata.emission_lookup
+    transition = cleandata.transition_lookup
+    for sentence in cleantest.get_all_sentences():
+        obj = viterbi(emission, transition, sentence, cleandata.tags, 7)
+        pred_tags = obj.populate_tree_2()
+        with open(dataset + "/dev.p4.out", "a", encoding="utf8") as f:
+            count = 0
+            for word in sentence:
+                f.write(word + " " + pred_tags[count] + "\n")
+                count += 1
+            f.write("\n")
+
+
+# running viterbi for dev files
+for d in ["EN", "AL", "CN", "SG"]:
+    run_dev(d)
+
+# running viterbi for test files
+for d in ["EN", "AL"]:
     run_test(d)
 
