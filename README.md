@@ -209,6 +209,9 @@ At this stage, we have a completed (n, t, 7) ndarray of Node() objects. We use t
 Using the 7th best score from the last layer, we implement a simple backtrack to get the tags of each node's parent. We append the tag of last node's parent (already stored in the node from previous iteration of modified viterbi) to a path. We then find this node's parent and do to same by inserting its tag at the front of this path. This is done from layer n+1 to layer 1, and the 7th best path is generated. 
 
 ### 2.3.3 Results
+Please refer to the table below for the results from our viterbi where the row is the type of data and the columns are the questions.
+![](assets/results1.PNG)
+![](assets/results2.PNG)
 
 ### 2.3.4 Using Log Calculations 
 While running the viterbi for part 3 and part 4, we realised that there might be undetected underflow problems. That would cause non-zero, but close to zero scores to be mistakenly recorded as zero, and affects the robustness of our model. In an attempt to 
@@ -283,5 +286,8 @@ The limitations of our implementation are:
 We will address these implementations in our next implementation, averaged perceptron.
 
 ### 2.5.2 Average Perceptron
-
+![](assets/part5averageparametersequation.jpg)
  
+
+## References
+- Collins, M. (2002). Discriminative training methods for hidden Markov models. Proceedings of the ACL-02 Conference on Empirical Methods in Natural Language Processing - EMNLP 02. doi: 10.3115/1118693.1118694
