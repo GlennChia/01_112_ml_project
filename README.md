@@ -24,7 +24,7 @@ py
 The output file will be <name of dataset e.g. EN/AL/CN/SG>/dev.p4.out.
 
 ## 1.4 Part 5
-The code is contained in the part5 folder. 
+The code is contained in the CODES folder. 
 If you are using the command line, run the commands: `python part5_average_perceptron.py`
 The output file will be 
 
