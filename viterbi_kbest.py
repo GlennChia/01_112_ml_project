@@ -175,6 +175,5 @@ for d in ["EN", "AL", "CN", "SG"]:
     run_dev(d)
 
 # running viterbi for test files
-for d in ["EN", "AL"]:
-    run_test(d)
-
+# for d in ["EN", "AL"]:
+#     run_test(d)
