@@ -1,7 +1,9 @@
 # 01_112_ml_project
 Project for SUTD 01.112 Machine Learning Fall 2019
 
-# 1. Instructions on running the code 
+# 1. Instructions on running the code
+
+All codes are contained in the `CODES` folder
 
 ## 1.1 Part 2
 The code is contained in the part2 folder. 
@@ -23,9 +25,11 @@ The output file will be <name of dataset e.g. EN/AL/CN/SG>/dev.p4.out.
 
 ## 1.4 Part 5
 The code is contained in the part5 folder. 
-If you are using the command line, run the commands: 
-py 
-The output file will be <name of dataset e.g. EN/AL/CN/SG>/test.p5.out.
+If you are using the command line, run the commands: `python part5_average_perceptron.py`
+The output file will be 
+
+- <name of dataset e.g. EN/AL/CN/SG>/dev.p5.out.
+- <name of dataset e.g. EN/AL/CN/SG>/test.p5.out.
 
 ![](assets/instructions_part5.PNG)
 
