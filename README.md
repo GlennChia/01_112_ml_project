@@ -4,12 +4,28 @@ Project for SUTD 01.112 Machine Learning Fall 2019
 # 1. Instructions on running the code 
 
 ## 1.1 Part 2
+The code is contained in the part2 folder. 
+If you are using the command line, run the commands: 
+py 
+The output file will be <name of dataset e.g. EN/AL/CN/SG>/dev.p2.out.
 
 ## 1.2 Part 3
+The code is in the part3 folder. 
+If you are using the command line, run the commands: 
+py 
+The output file will be <name of dataset e.g. EN/AL/CN/SG>/dev.p3.out.
 
 ## 1.3 Part 4
+The code is contained in the part4 folder. 
+If you are using the command line, run the commands: 
+py 
+The output file will be <name of dataset e.g. EN/AL/CN/SG>/dev.p4.out.
 
 ## 1.4 Part 5
+The code is contained in the part5 folder. 
+If you are using the command line, run the commands: 
+py 
+The output file will be <name of dataset e.g. EN/AL/CN/SG>/test.p5.out.
 
 
 
@@ -221,9 +237,7 @@ Apart from score calculation, the flow of the viterbi algorithm remains as above
 
 log_score of Node u = log_score(v) + $$log(a_(v, u) + log(b_u (o))$$   
 
-A summary of all the scores can be found below. 
-
-[add table of scores here]
+A summary of all the scores can be found in section 2.3.3 Results. 
 
 As expected, the scores for k-best viterbi have improved more than that of regular viterbi. In computing the 7th best 
 viterbi, we are more likely to encounter smaller emission and transition probabilities and fall into the underflow problem. 
@@ -297,3 +311,4 @@ For EN and then AL dataset:
 
 ## References
 - Collins, M. (2002). Discriminative training methods for hidden Markov models. Proceedings of the ACL-02 Conference on Empirical Methods in Natural Language Processing - EMNLP 02. doi: 10.3115/1118693.1118694
+- Boyd-Graber, J. (n.d.). Retrieved from http://users.umiacs.umd.edu/~jbg/teaching/CMSC_726/11d.pdf.
