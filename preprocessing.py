@@ -27,6 +27,9 @@ class clean_trainset():
             if index == 0:
                 words.append('')
                 tags.append('START')
+                split_word_tags = word_tags.split(' ')
+                words.append(split_word_tags[0])
+                tags.append(split_word_tags[1])
             elif index == len(temp) - 1:
                 words.append('')
                 tags.append('STOP')

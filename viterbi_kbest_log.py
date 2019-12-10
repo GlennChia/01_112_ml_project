@@ -164,15 +164,15 @@ def run_test(dataset):
     emission = cleandata.emission_lookup
     transition = cleandata.transition_lookup
     for sentence in cleantest.get_all_sentences():
-        obj = viterbi(emission, transition, sentence, cleandata.tags, 1)
+        obj = viterbi(emission, transition, sentence, cleandata.tags, 7)
         pred_tags = obj.populate_tree_2()
-        with open(dataset + "/dev_log.p3.out", "a", encoding="utf8") as f:
+        with open(dataset + "/dev_log.p4.out", "a", encoding="utf8") as f:
             count = 0
             for word in sentence:
                 f.write(word + " " + pred_tags[count] + "\n")
                 count += 1
             f.write("\n")
 # #
-for d in ["CN", "AL", "SG"]:
+for d in ["EN", "CN", "AL", "SG"]:
     run_test(d)
 
