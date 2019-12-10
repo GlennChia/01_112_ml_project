@@ -141,9 +141,6 @@ def run_dev(dataset):
     cleandata = preprocessing.clean_trainset(dataset + "/train")
     cleantest = preprocessing.clean_testset(dataset + "/dev.in", cleandata.smoothed)
 
-    # cleandata = preprocessing.clean_trainset(dataset + "/train")
-    # cleantest = preprocessing.clean_testset("Test/" + dataset + "/test.in", cleandata.smoothed)
-
     emission = cleandata.emission_lookup
     transition = cleandata.transition_lookup
     for sentence in cleantest.get_all_sentences():
