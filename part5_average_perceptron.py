@@ -51,7 +51,7 @@ def get_confident_tags(word_tag_sentences, word_occurence, tag_occurence_ratio):
     return confident_tags, all_tags
 
 
-def train(sentences, confident_tags, all_tags, update_tracker=0, iterations=10):
+def train(sentences, confident_tags, all_tags, iterations=11):
     weights = {}  # Temporary placeholder before we compute averaged weights
     weight_totals = {}
     # Data structures for average perceptron
@@ -113,14 +113,16 @@ def train(sentences, confident_tags, all_tags, update_tracker=0, iterations=10):
                             # Add prefixes and suffix
                             'current word prefix {}'.format(word[:2]): 1,
                             'current word suffix {}'.format(word[-3:]): 1,
-                            'previous word prefix {}'.format(current_lookback1[:2]): 1,
-                            'previous word suffix {}'.format(current_lookback1[-3:]): 1,
+                            # 'previous word prefix {}'.format(format_sentence[word_index-1][:3]): 1,
+                            # 'previous word suffix {}'.format(format_sentence[word_index-1][-3:]): 1,
                             #'previous word2 prefix {}'.format(current_lookback2[:2]): 1,
                             #'previous word2 suffix {}'.format(current_lookback2[-3:]): 1,
                             'next word prefix {}'.format(format_sentence[word_index+1][:2]): 1,
                             'next word suffix {}'.format(format_sentence[word_index+1][-3:]): 1,
                             #'next word2 prefix {}'.format(format_sentence[word_index+2][:2]): 1,
                             #'next word2 suffix {}'.format(format_sentence[word_index+2][-3:]): 1,
+                            'previous tag prefix {}'.format(current_lookback1[:2]): 1,
+                            'previous tag suffix {}'.format(current_lookback1[-3:]): 1,
                             # bias
                             'offset': 1
                         }
@@ -227,14 +229,16 @@ def predict(sentences, confident_tags, all_tags, weights):
                         # Add prefixes and suffix
                         'current word prefix {}'.format(word[:2]): 1,
                         'current word suffix {}'.format(word[-3:]): 1,
-                        'previous word prefix {}'.format(current_lookback1[:2]): 1,
-                        'previous word suffix {}'.format(current_lookback1[-3:]): 1,
+                        # 'previous word prefix {}'.format(format_sentence[word_index-1][:3]): 1,
+                        # 'previous word suffix {}'.format(format_sentence[word_index-1][-3:]): 1,
                         # 'previous word2 prefix {}'.format(current_lookback2[:2]): 1,
                         # 'previous word2 suffix {}'.format(current_lookback2[-3:]): 1,
                         'next word prefix {}'.format(format_sentence[word_index+1][:2]): 1,
                         'next word suffix {}'.format(format_sentence[word_index+1][-3:]): 1,
                         # 'next word2 prefix {}'.format(format_sentence[word_index+2][:2]): 1,
                         # 'next word2 suffix {}'.format(format_sentence[word_index+2][-3:]): 1,
+                        'previous tag prefix {}'.format(current_lookback1[:2]): 1,
+                        'previous tag suffix {}'.format(current_lookback1[-3:]): 1,
                         # bias
                         'offset': 1
                     }
@@ -272,8 +276,8 @@ if __name__ == '__main__':
     # =======
     iterations = 5
     # For confident predictions
-    word_occurence = 20
-    tag_occurence_ratio = 0.97
+    word_occurence = 19
+    tag_occurence_ratio = 0.98
 
     # ========
     # Generic Parameters
@@ -314,5 +318,3 @@ if __name__ == '__main__':
                 f.write(word + " " + tag + "\n")
             f.write("\n")
     f.close()
-    #tagger.train(cleantrain.outputsmootheddata())
-    #tagger.tag('EN', cleantest.get_all_sentences())
