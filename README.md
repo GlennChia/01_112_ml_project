@@ -220,4 +220,7 @@ A summary of all the scores can be found below.
 
 As expected, the scores for k-best viterbi have improved more than that of regular viterbi. In computing the 7th best 
 viterbi, we are more likely to encounter smaller emission and transition probabilities and fall into the underflow problem. 
+
+The output files from log calculations are found in dev_log.pX.out for x = 3, 4. 
+
  
