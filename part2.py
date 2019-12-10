@@ -99,6 +99,7 @@ def get_tag_fromemission(lookup, smoothedtest, dataset):
                 f.write(row['words'] + " " + lookup[row['words']] + "\n")
     f.close()
 
+
 def sentiment_analysis(dataset):
     train_path = dataset + "/train"
     traindf = readtopdftrain(train_path)
