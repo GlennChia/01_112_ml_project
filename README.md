@@ -18,14 +18,83 @@ Project for SUTD 01.112 Machine Learning Fall 2019
 ## 2.1 Part 2
 
 ### 2.1.1 Part 2 Question 1 Emission probabilities
+To work with the <b>training data</b>, we wrote a function defined as `readtopdftrain` that reads in the csv and shows the data as a DataFrame with the columns 'words' and 'tags' as shown below. <br/>
+![]('assets/part2readtopdftrain.PNG')
 
-### 2.2.2 Part 2 Question 2: Smoothing
+To work with the <b>testing data</b>, we wrote another function called `readtopdftest` that returns a DataFrame with the columns 'words' and 'sentence id'. Words with the same sentence id will be part of the same sentence. This is to make it easier to split the sentences for the output file later. <br/>
+![]('assets/part2readtopdftest.PNG') <br/>\
+To estimate the emission probabilities, in the training dataframe, we follow the following steps: <br/>
+![]('assets/part2estimateemissionparameters.PNG')
+<br/>
 
-### 2.2.3 Part 2 Question 3: Simple Sentiment Analysis System
+We decided to use DataFrame as it is a very efficient way of storing the data and there are many ways of transforming the data quickly and efficiently using pandas' functions.
+
+1. Create a new dataframe (`count_emit`) by grouping the rows of the dataframe by their tags, and then the words and finding the size of these groupings
+2. Reset the index of `count_emit`.
+3. Rename the size column as "count_emit".
+4. Create another dataframe (`count_tags`) that counts the number of tags only
+5. Lastly, merge the two dataframes together using the "tags" column and calculate the emission.
+    - `count['emission']` = $\frac{`count["count_emit"]`}{`count["count_tags"]`}$
+    - This follows the equation given:
+    ![]('assets/part2emissionequation.PNG')
+6. Drop the other two columns and leave the "emission" column.
+
+### 2.1.2 Part 2 Question 2: Smoothing
+We smooth the training data set using a function called `smoothingtrain`.<br/>
+![]('assets/part2smoothingtrain.PNG') <br/>
+
+The output would look like this: <br/>
+![]('assets/part2smoothedtrainoutput.PNG')
+
+
+`smoothingtrain` calls a helper function (`replacewordtrain`) that replaces words that occur less than k times with the tag '#UNK#'. <br/>
+This function is applied to every single row in the dataframe using the `.apply` function. <br/>
+![]('assets/part2replacewordtrain.PNG') <br/>
+
+The output looks like this: <br/>
+![]('assets/part2smoothedtestoutput.PNG') <br/>
+
+Similarly, for the test data, we smooth it using a function called `smoothingtest`. <br/>
+![]('assets/part2smoothingtest.PNG')
+
+This function calls the helper function `replacewordtest` that checks if the word is in the training data set. If it is, return the word. If not, replace it with the tag #UNK#. <br/>
+![]('assets/part2replacewordtest.PNG')
+
+### 2.1.3 Part 2 Question 3: Simple Sentiment Analysis System
+For this sentiment analysis system, we predict using the tag that gives us the maximum emission probability.
+Firstly, we created a function (`get_emissionlookup`) that will map each word to the tag with the highest emission probability.
+- Again, the function finds the indexes where the emission probability are the highest, then stores that in a column in a DataFrame with the words and tags.
+- Finally, it returns the dataframe as a dictionary of words and predicted tags.
+![]('assets/part2getemissionlookup.PNG')
+
+Next, the `get_tag_fromemission` function retrieves the tag for each word seen in the test set, and writes it out to a file. <br/>
+![]('assets/part2gettagfromemission.PNG')
+
+All of these functions are called in a `sentiment_analysis` function that will read in the data, smooth it, and write the predicted results to a file. <br/>
+![]('assets/part2sentimentanalysis.PNG')
 
 ## 2.2 Part 3 
 
 ### 2.2.1 Write a function that estimates the transition parameters from the training set using MLE (maximum likelihood estimation): Consider special cases for STOP and START
+The `read_to_pdf` function here differs a bit from the ones coded in Part 2. We still create a dataframe, however, in this function, we have to append the 'START' and 'STOP' tags so as to run the Viterbi. Thus, we check for the first and last index, and append 'START' and 'STOP' accordingly. Also if the word is equal to an empty string, we append 'STOP' and then 'START' as it signifies the end of the old sentence and the start of the new one. <br/>
+Also, we create a new column called 'tags_next' that shows the tag in the sequence after the current one.
+![]('assets/part3readtopdf.PNG')
+<br/>
+The output of `readtopdf` is as follows: <br/>
+![]('assets/part3readtopdfoutput.PNG')
+
+Next, we create the `estimate_transition_parameters` function. <br/>
+Using the training dataframe passed to us, we group the rows in the dataframe by the tags again and count the number of tags in the dataframe. <br/>
+Next, we group the rows by the tags and then by tags_next, and count the number of tags_next per tags (transition of tag -> tag_next). <br/>
+- Note that we have to locate all of the tags_next that are empty string and replace them with the number zero, as they are not valid transitions.
+Lastly, we drop columns that we do not require, sort the values and return the dataframe.
+<br/>
+
+The function code is as follows: <br/>
+![]('assets/part3estimatetransmissionparameters.PNG')
+<br/>
+The output is: <br/>
+![]('assets/part3estimatetransmissionparametersoutput.PNG')
 
 
 
