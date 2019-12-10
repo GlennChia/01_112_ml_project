@@ -85,20 +85,21 @@ def train(sentences, confident_tags, all_tags, iterations=11):
                 # else:
                 if not training_predictions:
                     # Get features for unconfident words
+                    i = word_index + 2
                     features = defaultdict(
                         lambda: 0,
                         {
                             'current word {}'.format(word): 1,
                             'previous tag {}'.format(current_lookback1): 1,
-                            'previous word {}'.format(format_sentence[word_index-1]): 1,
+                            'previous word {}'.format(format_sentence[i-1]): 1,
                             # Add lookback 2
                             'previous tag2 {}'.format(current_lookback2): 1,
-                            'previous word2 {}'.format(format_sentence[word_index-2]): 1,
+                            'previous word2 {}'.format(format_sentence[i-2]): 1,
                             # combine word combinations
-                            #'previous word2 {} previous word {}'.format(format_sentence[word_index-2], format_sentence[word_index-1]): 1,
-                            #'previous word2 {} previous word {} current word {}'.format(format_sentence[word_index-2], format_sentence[word_index-1], word): 1,#
-                            #'previous word2 {} current word {}'.format(format_sentence[word_index-2], word): 1,
-                            #'previous word {} current word {}'.format(format_sentence[word_index-1], word): 1,
+                            #'previous word2 {} previous word {}'.format(format_sentence[i-2], format_sentence[i-1]): 1,
+                            #'previous word2 {} previous word {} current word {}'.format(format_sentence[i-2], format_sentence[i-1], word): 1,#
+                            #'previous word2 {} current word {}'.format(format_sentence[i-2], word): 1,
+                            #'previous word {} current word {}'.format(format_sentence[i-1], word): 1,
                             # Combine tag patterns
                             'previous tag {} current word {}'.format(current_lookback1, word): 1,
                             'previous tag2 {} current word {}'.format(current_lookback2, word): 1,
@@ -106,22 +107,22 @@ def train(sentences, confident_tags, all_tags, iterations=11):
                             'previous tag2 {} previous tag {}'.format(current_lookback2, current_lookback1): 1,
                             # 'previous tag2 {} previous tag {} current word {}'.format(current_lookback2, current_lookback1, word): 1,
                             # Add lookahead
-                            'next word {}'.format(format_sentence[word_index+1]): 1,
-                            'next word2 {}'.format(format_sentence[word_index+2]): 1,
+                            'next word {}'.format(format_sentence[i+1]): 1,
+                            'next word2 {}'.format(format_sentence[i+2]): 1,
                             # 'next tag {} current word {}'.format(, word): 1,
                             # 'next tag2 {}'.format()
                             # Add prefixes and suffix
                             'current word prefix {}'.format(word[:2]): 1,
                             'current word suffix {}'.format(word[-3:]): 1,
-                            # 'previous word prefix {}'.format(format_sentence[word_index-1][:3]): 1,
-                            # 'previous word suffix {}'.format(format_sentence[word_index-1][-3:]): 1,
+                            # 'previous word prefix {}'.format(format_sentence[i-1][:3]): 1,
+                            # 'previous word suffix {}'.format(format_sentence[i-1][-3:]): 1,
                             #'previous word2 prefix {}'.format(current_lookback2[:2]): 1,
                             #'previous word2 suffix {}'.format(current_lookback2[-3:]): 1,
-                            'next word prefix {}'.format(format_sentence[word_index+1][:2]): 1,
-                            'next word suffix {}'.format(format_sentence[word_index+1][-3:]): 1,
-                            #'next word2 prefix {}'.format(format_sentence[word_index+2][:2]): 1,
-                            #'next word2 suffix {}'.format(format_sentence[word_index+2][-3:]): 1,
-                            'previous tag prefix {}'.format(current_lookback1[:2]): 1,
+                            'next word prefix {}'.format(format_sentence[i+1][:3]): 1,
+                            'next word suffix {}'.format(format_sentence[i+1][-3:]): 1,
+                            #'next word2 prefix {}'.format(format_sentence[i+2][:2]): 1,
+                            #'next word2 suffix {}'.format(format_sentence[i+2][-3:]): 1,
+                            'previous tag prefix {}'.format(current_lookback1[:3]): 1,
                             'previous tag suffix {}'.format(current_lookback1[-3:]): 1,
                             # bias
                             'offset': 1
@@ -201,43 +202,44 @@ def predict(sentences, confident_tags, all_tags, weights):
             # else:
             if not training_predictions:
                 # Get features for unconfident words
+                i = word_index + 2
                 features = defaultdict(
                     lambda: 0,
                     {
                         'current word {}'.format(word): 1,
                         'previous tag {}'.format(current_lookback1): 1,
-                        'previous word {}'.format(format_sentence[word_index-1]): 1,
+                        'previous word {}'.format(format_sentence[i-1]): 1,
                         # Add lookback 2
                         'previous tag2 {}'.format(current_lookback2): 1,
-                        'previous word2 {}'.format(format_sentence[word_index-2]): 1,
+                        'previous word2 {}'.format(format_sentence[i-2]): 1,
                         # combine word combinations
-                        # 'previous word2 {} previous word {}'.format(format_sentence[word_index-2], format_sentence[word_index-1]): 1,
-                        # 'previous word2 {} previous word {} current word {}'.format(format_sentence[word_index-2], format_sentence[word_index-1], word): 1,#
-                        # 'previous word2 {} current word {}'.format(format_sentence[word_index-2], word): 1,
-                        # 'previous word {} current word {}'.format(format_sentence[word_index-1], word): 1,
+                        #'previous word2 {} previous word {}'.format(format_sentence[i-2], format_sentence[i-1]): 1,
+                        #'previous word2 {} previous word {} current word {}'.format(format_sentence[i-2], format_sentence[i-1], word): 1,#
+                        #'previous word2 {} current word {}'.format(format_sentence[i-2], word): 1,
+                        #'previous word {} current word {}'.format(format_sentence[i-1], word): 1,
                         # Combine tag patterns
                         'previous tag {} current word {}'.format(current_lookback1, word): 1,
                         'previous tag2 {} current word {}'.format(current_lookback2, word): 1,
-                        #'previous tag2 {} previous tag {} current word {}'.format(current_lookback2, current_lookback1, word): 1,
+                        # 'previous tag2 {} previous tag {} current word {}'.format(current_lookback2, current_lookback1, word): 1,
                         'previous tag2 {} previous tag {}'.format(current_lookback2, current_lookback1): 1,
                         # 'previous tag2 {} previous tag {} current word {}'.format(current_lookback2, current_lookback1, word): 1,
                         # Add lookahead
-                        'next word {}'.format(format_sentence[word_index+1]): 1,
-                        'next word2 {}'.format(format_sentence[word_index+2]): 1,
+                        'next word {}'.format(format_sentence[i+1]): 1,
+                        'next word2 {}'.format(format_sentence[i+2]): 1,
                         # 'next tag {} current word {}'.format(, word): 1,
                         # 'next tag2 {}'.format()
                         # Add prefixes and suffix
                         'current word prefix {}'.format(word[:2]): 1,
                         'current word suffix {}'.format(word[-3:]): 1,
-                        # 'previous word prefix {}'.format(format_sentence[word_index-1][:3]): 1,
-                        # 'previous word suffix {}'.format(format_sentence[word_index-1][-3:]): 1,
-                        # 'previous word2 prefix {}'.format(current_lookback2[:2]): 1,
-                        # 'previous word2 suffix {}'.format(current_lookback2[-3:]): 1,
-                        'next word prefix {}'.format(format_sentence[word_index+1][:2]): 1,
-                        'next word suffix {}'.format(format_sentence[word_index+1][-3:]): 1,
-                        # 'next word2 prefix {}'.format(format_sentence[word_index+2][:2]): 1,
-                        # 'next word2 suffix {}'.format(format_sentence[word_index+2][-3:]): 1,
-                        'previous tag prefix {}'.format(current_lookback1[:2]): 1,
+                        # 'previous word prefix {}'.format(format_sentence[i-1][:3]): 1,
+                        # 'previous word suffix {}'.format(format_sentence[i-1][-3:]): 1,
+                        #'previous word2 prefix {}'.format(current_lookback2[:2]): 1,
+                        #'previous word2 suffix {}'.format(current_lookback2[-3:]): 1,
+                        'next word prefix {}'.format(format_sentence[i+1][:3]): 1,
+                        'next word suffix {}'.format(format_sentence[i+1][-3:]): 1,
+                        #'next word2 prefix {}'.format(format_sentence[i+2][:2]): 1,
+                        #'next word2 suffix {}'.format(format_sentence[i+2][-3:]): 1,
+                        'previous tag prefix {}'.format(current_lookback1[:3]): 1,
                         'previous tag suffix {}'.format(current_lookback1[-3:]): 1,
                         # bias
                         'offset': 1
@@ -271,50 +273,46 @@ def predict(sentences, confident_tags, all_tags, weights):
 
 
 if __name__ == '__main__':
+    '''
+    python .\EvalScript\evalResult.py EN/dev.out EN/dev.p5.out
+    python .\EvalScript\evalResult.py AL/dev.out AL/dev.p5.out
+    '''
     # =======
     # Hyper parameters
     # =======
-    iterations = 5
+    iterations = 11
     # For confident predictions
     word_occurence = 19
     tag_occurence_ratio = 0.98
 
-    # ========
-    # Generic Parameters
-    # ========
-    file_path = ['EN', 'AL']
-    part5a_output_file = '/test.p5a.out'
-    part5b_output_file = '/test.p5b.out'
-    train_file = 'train'
-
-    # =======
-    # Data pre-processing
-    # =======
-    # Smooth the train and the test
-    cleantrain = clean_trainset('EN/train')
-    cleantest = clean_testset('EN/dev.in', cleantrain.smoothed)
-    # Format tarin data into [[('',START), ('word1', 'tagA'), ..., ('wordn', 'tagB')] ...]
-    cleantrain_format = cleantrain.outputsmootheddata()
-    # Format test data into [[word1, word2, ..., wordn], ...]
-    cleantest_format = cleantest.get_all_sentences()
-
-    # Getting a dictionary of confident tags and a set of all tags
-    confident_tags, all_tags = get_confident_tags(cleantrain_format, word_occurence, tag_occurence_ratio)
-
-    # Set global parameters
-
-    #print(confident_tags)
-    print('BEGIN TRAINING')
-    final_weights = train(cleantrain_format, confident_tags, all_tags)
-    #print(final)
-    print('BEGIN PREDICTIONS')
-    predicted_results = predict(cleantest_format, confident_tags, all_tags, final_weights)
-    #output_file = testfilepath + "/test.p5.out"
-    output_file = "EN/eda.p5.out"
-    with open(output_file, "w", encoding="utf8") as f:
-        for sentence in predicted_results:
-            for predtuple in sentence:
-                word, tag = predtuple
-                f.write(word + " " + tag + "\n")
-            f.write("\n")
-    f.close()
+    def run_predictions(folder, part):
+        # =======
+        # Data pre-processing
+        # =======
+        # Smooth the train and the test
+        cleantrain = clean_trainset('{}/train'.format(folder))
+        cleantest = clean_testset('{}/{}.in'.format(folder, part), cleantrain.smoothed)
+        # Format tarin data into [[('',START), ('word1', 'tagA'), ..., ('wordn', 'tagB')] ...]
+        cleantrain_format = cleantrain.outputsmootheddata()
+        # Format test data into [[word1, word2, ..., wordn], ...]
+        cleantest_format = cleantest.get_all_sentences()
+        # Getting a dictionary of confident tags and a set of all tags
+        confident_tags, all_tags = get_confident_tags(cleantrain_format, word_occurence, tag_occurence_ratio)
+        #print(confident_tags)
+        print('BEGIN TRAINING FOR {} PART {}'.format(folder, part))
+        final_weights = train(cleantrain_format, confident_tags, all_tags, iterations)
+        #print(final)
+        print('BEGIN PREDICTIONS')
+        predicted_results = predict(cleantest_format, confident_tags, all_tags, final_weights)
+        output_file = "{}/{}.p5.out".format(folder, part)
+        with open(output_file, "w", encoding="utf8") as f:
+            for sentence in predicted_results:
+                for predtuple in sentence:
+                    word, tag = predtuple
+                    f.write(word + " " + tag + "\n")
+                f.write("\n")
+        f.close()
+    run_predictions('EN', 'dev')
+    run_predictions('AL', 'dev')
+    # run_predictions('EN', 'test')
+    # run_predictions('AL', 'test')
