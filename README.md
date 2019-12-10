@@ -287,6 +287,12 @@ We will address these implementations in our next implementation, averaged perce
 
 ### 2.5.2 Average Perceptron
 ![](assets/part5averageparametersequation.jpg)
+
+### 2.5.3 Average Perceptron Results
+Below are the results from running the average perceptron code: <br/>
+
+For EN and then AL dataset:
+![](assets/part5results.jpg)
  
 
 ## References
