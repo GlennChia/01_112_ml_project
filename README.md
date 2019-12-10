@@ -206,3 +206,18 @@ Using the 7th best score from the last layer, we implement a simple backtrack to
 
 ### 2.3.3 Results
 
+###2.3.4 Using Log Calculations 
+While running the viterbi for part 3 and part 4, we realised that there might be undetected underflow problems. That would cause non-zero, but close to zero scores to be mistakenly recorded as zero, and affects the robustness of our model. In an attempt to 
+circumvent this problem, we implement the viterbi using log calculations.
+
+Apart from score calculation, the flow of the viterbi algorithm remains as above. 
+
+log_score of Node u = log_score(v) + $$log(a_(v, u) + log(b_u (o))$$   
+
+A summary of all the scores can be found below. 
+
+[add table of scores here]
+
+As expected, the scores for k-best viterbi have improved more than that of regular viterbi. In computing the 7th best 
+viterbi, we are more likely to encounter smaller emission and transition probabilities and fall into the underflow problem. 
+ 
