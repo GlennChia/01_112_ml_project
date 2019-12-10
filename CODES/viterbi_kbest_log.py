@@ -146,18 +146,9 @@ class viterbi():
         # return tree, final_score, k_paths
         return kth_path
 
-transition_lookup = {("START", "A"): 1.0, ("A", "A"): 0.5 , ("A", "B"): 0.5, ("B", "B"): 0.8, ("B", "STOP"): 0.2}
-emission_lookup = {("A", "the"): 0.9, ("A", "dog"): 0.1, ("B", "the"): 0.1, ("B", "dog"): 0.9}
-sentence = ["the", "dog", "the"]
-test = viterbi(emission_lookup, transition_lookup, sentence, ["A", "B"], 1)
-test2 = viterbi(emission_lookup, transition_lookup, sentence, ["A", "B"], 2)
-
-# print("1st best : ", test.populate_tree_2())
-# print("2nd best: ", test2.populate_tree_2())
 
 
-
-def run_test(dataset):
+def run_dev(dataset):
     cleandata = preprocessing.clean_trainset(dataset + "/train")
     cleantest = preprocessing.clean_testset(dataset + "/dev.in", cleandata.smoothed)
 
@@ -172,7 +163,7 @@ def run_test(dataset):
                 f.write(word + " " + pred_tags[count] + "\n")
                 count += 1
             f.write("\n")
-# #
+
 for d in ["EN", "CN", "AL", "SG"]:
-    run_test(d)
+    run_dev(d)
 

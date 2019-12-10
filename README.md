@@ -6,22 +6,39 @@ Project for SUTD 01.112 Machine Learning Fall 2019
 All codes are contained in the `CODES` folder
 
 ## 1.1 Part 2
-The code is contained in the part2 folder. 
-If you are using the command line, run the commands: 
-py 
+File to run: `part2.py`
+
+If you are using the command line, run the commands: 'python part2.py'
+
+Take note that running this file will generate ALL output files for EN, CN, AL and SG. 
+To only run on selected datasets, comment out appropriate in `lines 125-128`. 
+
 The output file will be <name of dataset e.g. EN/AL/CN/SG>/dev.p2.out.
 
 ## 1.2 Part 3
-The code is in the part3 folder. 
-If you are using the command line, run the commands: 
-py 
+File to run: `viterbi_class.py`
+
+If you are using the command line, run the commands: 'python viterbi_class.py'
+Take note that running this file will generate ALL output files for EN, CN, AL and SG. 
+To only run on selected files, comment out and/edit `lines 265-266`. 
 The output file will be <name of dataset e.g. EN/AL/CN/SG>/dev.p3.out.
 
 ## 1.3 Part 4
-The code is contained in the part4 folder. 
-If you are using the command line, run the commands: 
-py 
+File to run: `viterbi_kbest.py`
+If you are using the command line, run the commands: 'python viterbi_kbest.py'
+
+Take note that running this file will generate ALL output files for EN, CN, AL, SG & Test datasets. 
+To only run on selected files, comment out and/edit `lines 173-179`. 
+If you would like to get kth best path (not 7th), you can also do so by changing the last argument in `line 147` to your desired value of k. 
+
 The output file will be <name of dataset e.g. EN/AL/CN/SG>/dev.p4.out.
+
+If you would like to run our viterbi using log calculations, do so using `viterbi_kbest_log.py` file. 
+
+Take note that running this file will generate ALL output files for EN, CN, AL, SG & Test datasets. 
+To only run on selected files, comment out and/edit `lines 167-168`. 
+
+The output file will be <name of dataset e.g. EN/AL/CN/SG>/dev_log.p4.out.
 
 ## 1.4 Part 5
 The code is contained in the CODES folder. 

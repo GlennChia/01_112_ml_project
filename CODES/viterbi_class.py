@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import itertools
+import preprocessing
 
 def read_to_pdf(file_path):
     with open(file_path, encoding='utf8') as f_message:
@@ -215,7 +215,6 @@ class viterbi():
                     tree[idx, i] = max(all_scores)
                     tag_idx = all_scores.index(max(all_scores))
                     tag = self.t[tag_idx]
-                    # all_nodes[idx][i] = node(idx, i)
                     all_nodes[idx][i-1].subpath = tag
                     if i != 1:
                         all_nodes[idx][i-1].parent = all_nodes[tag_idx][i-2]
@@ -229,131 +228,39 @@ class viterbi():
         for i in range(len(self.sentence), 0,  -1):
             path.insert(0, current_node.subpath)
             current_node = current_node.parent
-        print(path)
 
-        return tree, maxscore
-
+        return path
 
 
-    def build_tree_2(self, k):
-        """
-        n = length of sentence
-        t = # of tags available
-        k = choice of how many paths
-        :return:
-        """
-        return np.zeros((len(self.t), len(self.sentence), k))
-
-    def populate_tree_2(self, k_best):
-        """
-        Returns populated tree with k-best scores for each node
-        :param k: choice of k-best scores
-        :return: np.array of size (n, t, k). see build_tree_2 for more details.
-        """
-        tree = self.build_tree_2(k_best)
-        all_nodes = [[node(j, i) for j in range(len(self.t))] for i in range(len(self.sentence))]
-
-        for i in range(len(self.sentence) + 1):
-            if i == 0:
-                idx = 0
-                for j in self.t:
-                    if ("START", j) not in self.transition or (j, self.sentence[0]) not in self.emission:
-                        tree[idx, i, 0] = 0
-                    else:
-                        tree[idx, i, 0] = self.transition[("START", j)] * self.emission[(j, self.sentence[0])]
-                    idx += 1
-
-            elif i == len(self.sentence):
-                all_scores = []
-                idx = 0
-                for j in self.t:
-                    if (j, "STOP") not in self.transition:
-                        all_scores.append([0])
-                    else:
-                        score = tree[idx, -1] * self.transition[(j, "STOP")]
-                        all_scores.append(score)
-                    idx += 1
-
-                final_score = []
-                flat_scores = list(itertools.chain(*all_scores))
-                for l in range(k_best):
-                    maxi = max(flat_scores)
-                    final_score.append(maxi)
-                    flat_scores.remove(maxi)
-
-            else:
-                idx = 0
-                for j in self.t:
-                    all_scores = []
-                    idx_k = 0
-                    for k in self.t:
-                        print("Inner: " + k)
-                        if (k, j) not in self.transition or (j, self.sentence[i]) not in self.emission:
-                            all_scores.append([0])
-                        else:
-                            score = tree[idx_k, i-1] * self.transition[(k, j)] * self.emission[(j, self.sentence[i])]
-                            all_scores.append(score)
-                        idx_k += 1
-                        # tree[idx, i, ] = max(all_scores)
-
-                    flat_scores = list(itertools.chain(*all_scores))
-                    for l in range(k_best):
-                        maxi = max(flat_scores)
-                        tree[idx, i, l] = maxi
-
-                        # tag = self.t[tag_idx]
-                        # all_nodes[idx][i - 1].subpath = tag
-                        # if i != 1:
-                        #     all_nodes[idx][i - 1].parent = all_nodes[tag_idx][i - 2]
-                        # else:
-                        #     pass
-
-                        flat_scores.remove(maxi)
-                    idx += 1
-        return tree, final_score
-
-
-
-
-
-# sentence = "Municipal bonds are generally much safer than corporate bonds"
-# df_en = read_to_pdf("EN/train")
-# df_en = smoothingtrain(df_en)
-
-
-
-
-def get_transition_lookup(df_transition):
-    test = df_transition.drop(columns=["count_tag", "count_transition"])
-    transition_lookup = dict()
-    for i in range(len(test.tags)):
-        transition_lookup[(test.tags[i], test.tags_next[i])] = test.transition_probability[i]
-    return transition_lookup
-
-def get_emission_lookup(df_emission):
-    emission_lookup = dict()
-    for i in range(len(df_emission.tags)):
-        emission_lookup[(df_emission.tags[i], df_emission.words[i])] = df_emission.emission[i]
-    return emission_lookup
-
-# df_emission = estimate_emission_parameters(df_en)
-# emission_lookup = get_emission_lookup(df_emission)
+# def get_transition_lookup(df_transition):
+#     test = df_transition.drop(columns=["count_tag", "count_transition"])
+#     transition_lookup = dict()
+#     for i in range(len(test.tags)):
+#         transition_lookup[(test.tags[i], test.tags_next[i])] = test.transition_probability[i]
+#     return transition_lookup
 #
-# df_transition = estimate_transition_parameters(df_en)
-# transmission_lookup = get_transition_lookup(df_transition)
-# print(emission_lookup)
-# tags = list(set(df_transition.tags))
-#
-# test = viterbi(emission_lookup, transmission_lookup, sentence, tags)
-# print(test.get_score(9, 1))
+# def get_emission_lookup(df_emission):
+#     emission_lookup = dict()
+#     for i in range(len(df_emission.tags)):
+#         emission_lookup[(df_emission.tags[i], df_emission.words[i])] = df_emission.emission[i]
+#     return emission_lookup
 
-transition_lookup = {("START", "A"): 1.0, ("A", "A"): 0.5 , ("A", "B"): 0.5, ("B", "B"): 0.8, ("B", "STOP"): 0.2}
-emission_lookup = {("A", "the"): 0.9, ("A", "dog"): 0.1, ("B", "the"): 0.1, ("B", "dog"): 0.9}
+def run_dev(dataset):
+    cleandata = preprocessing.clean_trainset(dataset + "/train")
+    cleantest = preprocessing.clean_testset(dataset + "/dev.in", cleandata.smoothed)
 
-sentence = "the dog the"
-print(sentence.split(" "))
-test = viterbi(emission_lookup, transition_lookup, sentence, ["A", "B"])
-print(test.populate_tree())
-print(test.populate_tree_2(4))
-# print(test.populate_tree_2(2))
-# print(test.path)
+    emission = cleandata.emission_lookup
+    transition = cleandata.transition_lookup
+    for sentence in cleantest.get_all_sentences():
+        obj = viterbi(emission, transition, sentence, cleandata.tags)
+        pred_tags = obj.populate_tree()
+        with open(dataset + "/dev.p3.out", "a", encoding="utf8") as f:
+            count = 0
+            for word in sentence:
+                f.write(word + " " + pred_tags[count] + "\n")
+                count += 1
+            f.write("\n")
+
+
+for d in ["EN", "CN", "AL", "SG"]:
+    run_dev(d)
