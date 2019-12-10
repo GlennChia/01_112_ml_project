@@ -42,7 +42,10 @@ class viterbi():
         k = choice of how many paths
         :return:
         """
-        return np.zeros((len(self.sentence), len(self.t), k))
+
+        out = np.zeros((len(self.sentence), len(self.t), k))
+        out[0] = -np.inf
+        return out
 
     def get_transition_array(self, dest_node):
         out = np.zeros((len(self.t), 1))
@@ -61,7 +64,7 @@ class viterbi():
         :param k: choice of k-best scores
         :return: np.array of size (n, t, k). see build_tree_2 for more details.
         """
-        tree = self.build_tree_2(self.kbest)
+        tree = self.build_tree_2(self.kbest)  # tree stores all log scores
         all_nodes = [[[node_k(i, j,  k) for k in range(self.kbest)]for j in range(len(self.t))] for i in range(len(self.sentence))]
 
         for i in range(len(self.sentence) + 1):
@@ -69,21 +72,20 @@ class viterbi():
                 idx = 0
                 for j in self.t:
                     if ("START", j) not in self.transition or (j, self.sentence[0]) not in self.emission:
-                        tree[i, idx, 0] = 0
-                        # all_nodes[idx][i][0].score = 0
+                        tree[i, idx, 0] = -np.inf
                     else:
-                        tree[i, idx, 0] = self.transition[("START", j)] * self.emission[(j, self.sentence[0])]
+                        tree[i, idx, 0] = np.log(self.transition[("START", j)]) + np.log(self.emission[(j, self.sentence[0])])
                         # all_nodes[idx][i][0] = self.transition[("START", j)] * self.emission[(j, self.sentence[0])]
                     idx += 1
-
+                # print(tree[i])
 
             elif i == len(self.sentence):
                 last_layer = []
-
                 raw_scores = tree[i-1]  # extracts column (k x 1) scores in i-1
-                candidate_scores = raw_scores * self.get_transition_array("STOP")
-                max_ind = k_largest_index_argsort(candidate_scores, self.kbest)
-                final_score = [candidate_scores[tuple(idx)] for idx in max_ind]
+                with (np.errstate(divide="ignore")):
+                    candidate_scores = raw_scores + np.log(self.get_transition_array("STOP"))
+                    max_ind = k_largest_index_argsort(candidate_scores, self.kbest)
+                    final_score = [candidate_scores[tuple(idx)] for idx in max_ind]
 
 
                 for l in range(self.kbest):
@@ -97,16 +99,23 @@ class viterbi():
 
             else:
                 raw_scores = tree[i-1]  # extracts column (k x 1) scores in i-1
+                # print("--- raw scores ---")
+                # print(raw_scores)
 
                 idx_k = 0
                 for k in self.t:
-                    candidate_scores = raw_scores * self.get_transition_array(k)
-                    max_ind = k_largest_index_argsort(candidate_scores, self.kbest)
+                    # print("--- tag {} ---".format(k))
+                    # print(self.get_transition_array(k))
+                    with (np.errstate(divide="ignore")):
+                        candidate_scores = raw_scores + np.log(self.get_transition_array(k))
+                        # print("--- candidate scores ---")
+                        # print(candidate_scores)
+                        max_ind = k_largest_index_argsort(candidate_scores, self.kbest)
 
                     if (k, self.sentence[i]) not in self.emission:
-                        tree[i, idx_k] = 0
+                        tree[i, idx_k] = -np.inf
                     else:
-                        tree[i, idx_k] = np.array([candidate_scores[tuple(idx)] for idx in max_ind]) * self.emission[k, self.sentence[i]]
+                        tree[i, idx_k] = [candidate_scores[tuple(idx)] for idx in max_ind] + np.log(self.emission[k, self.sentence[i]])
 
                     for l in range(self.kbest):
                         j_coord = max_ind[l][0]
@@ -143,8 +152,8 @@ sentence = ["the", "dog", "the"]
 test = viterbi(emission_lookup, transition_lookup, sentence, ["A", "B"], 1)
 test2 = viterbi(emission_lookup, transition_lookup, sentence, ["A", "B"], 2)
 
-print("1st best : ", test.populate_tree_2())
-print("2nd best: ", test2.populate_tree_2())
+# print("1st best : ", test.populate_tree_2())
+# print("2nd best: ", test2.populate_tree_2())
 
 
 
@@ -157,14 +166,13 @@ def run_test(dataset):
     for sentence in cleantest.get_all_sentences():
         obj = viterbi(emission, transition, sentence, cleandata.tags, 1)
         pred_tags = obj.populate_tree_2()
-        with open(dataset + "/dev.p4.out", "a", encoding="utf8") as f:
+        with open(dataset + "/dev_log.p3.out", "a", encoding="utf8") as f:
             count = 0
             for word in sentence:
                 f.write(word + " " + pred_tags[count] + "\n")
                 count += 1
             f.write("\n")
-#
-# for d in ["EN", "CN", "AL", "SG"]:
-#     run_test(d)
+# #
+for d in ["CN", "AL", "SG"]:
+    run_test(d)
 
-# run_test("EN")
