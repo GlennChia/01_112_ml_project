@@ -19,12 +19,12 @@ Project for SUTD 01.112 Machine Learning Fall 2019
 
 ### 2.1.1 Part 2 Question 1 Emission probabilities
 To work with the <b>training data</b>, we wrote a function defined as `readtopdftrain` that reads in the csv and shows the data as a DataFrame with the columns 'words' and 'tags' as shown below. <br/>
-![]('assets/part2readtopdftrain.PNG')
+![](assets/part2readtopdftrain.PNG)
 
 To work with the <b>testing data</b>, we wrote another function called `readtopdftest` that returns a DataFrame with the columns 'words' and 'sentence id'. Words with the same sentence id will be part of the same sentence. This is to make it easier to split the sentences for the output file later. <br/>
-![]('assets/part2readtopdftest.PNG') <br/>\
+![](assets/part2readtopdftest.PNG) <br/>\
 To estimate the emission probabilities, in the training dataframe, we follow the following steps: <br/>
-![]('assets/part2estimateemissionparameters.PNG')
+![](assets/part2estimateemissionparameters.PNG)
 <br/>
 
 We decided to use DataFrame as it is a very efficient way of storing the data and there are many ways of transforming the data quickly and efficiently using pandas' functions.
@@ -35,53 +35,55 @@ We decided to use DataFrame as it is a very efficient way of storing the data an
 4. Create another dataframe (`count_tags`) that counts the number of tags only
 5. Lastly, merge the two dataframes together using the "tags" column and calculate the emission.
     - `count['emission']` = $\frac{`count["count_emit"]`}{`count["count_tags"]`}$
-    - This follows the equation given:
-    ![]('assets/part2emissionequation.PNG')
+    - This follows the equation given: <br/>
+    ![](assets/part2emissionequation.PNG)
 6. Drop the other two columns and leave the "emission" column.
 
 ### 2.1.2 Part 2 Question 2: Smoothing
 We smooth the training data set using a function called `smoothingtrain`.<br/>
-![]('assets/part2smoothingtrain.PNG') <br/>
+![](assets/part2smoothingtrain.PNG) <br/>
 
 The output would look like this: <br/>
-![]('assets/part2smoothedtrainoutput.PNG')
+![](assets/part2smoothedtrainoutput.PNG)
 
 
 `smoothingtrain` calls a helper function (`replacewordtrain`) that replaces words that occur less than k times with the tag '#UNK#'. <br/>
 This function is applied to every single row in the dataframe using the `.apply` function. <br/>
-![]('assets/part2replacewordtrain.PNG') <br/>
+![](assets/part2replacewordtrain.PNG) <br/>
 
 The output looks like this: <br/>
-![]('assets/part2smoothedtestoutput.PNG') <br/>
+![](assets/part2smoothedtestoutput.PNG) <br/>
 
 Similarly, for the test data, we smooth it using a function called `smoothingtest`. <br/>
-![]('assets/part2smoothingtest.PNG')
+![](assets/part2smoothingtest.PNG)
 
 This function calls the helper function `replacewordtest` that checks if the word is in the training data set. If it is, return the word. If not, replace it with the tag #UNK#. <br/>
-![]('assets/part2replacewordtest.PNG')
+![](assets/part2replacewordtest.PNG)
 
 ### 2.1.3 Part 2 Question 3: Simple Sentiment Analysis System
 For this sentiment analysis system, we predict using the tag that gives us the maximum emission probability.
 Firstly, we created a function (`get_emissionlookup`) that will map each word to the tag with the highest emission probability.
 - Again, the function finds the indexes where the emission probability are the highest, then stores that in a column in a DataFrame with the words and tags.
 - Finally, it returns the dataframe as a dictionary of words and predicted tags.
-![]('assets/part2getemissionlookup.PNG')
+![](assets/part2getemissionlookup.PNG)
 
 Next, the `get_tag_fromemission` function retrieves the tag for each word seen in the test set, and writes it out to a file. <br/>
-![]('assets/part2gettagfromemission.PNG')
+![](assets/part2gettagfromemissionlookup.PNG)
 
 All of these functions are called in a `sentiment_analysis` function that will read in the data, smooth it, and write the predicted results to a file. <br/>
-![]('assets/part2sentimentanalysis.PNG')
+![](assets/part2sentimentanalysis.PNG)
 
 ## 2.2 Part 3 
 
 ### 2.2.1 Write a function that estimates the transition parameters from the training set using MLE (maximum likelihood estimation): Consider special cases for STOP and START
 The `read_to_pdf` function here differs a bit from the ones coded in Part 2. We still create a dataframe, however, in this function, we have to append the 'START' and 'STOP' tags so as to run the Viterbi. Thus, we check for the first and last index, and append 'START' and 'STOP' accordingly. Also if the word is equal to an empty string, we append 'STOP' and then 'START' as it signifies the end of the old sentence and the start of the new one. <br/>
 Also, we create a new column called 'tags_next' that shows the tag in the sequence after the current one.
-![]('assets/part3readtopdf.PNG')
+
+![](assets/part3readtopdf.PNG)
 <br/>
+
 The output of `readtopdf` is as follows: <br/>
-![]('assets/part3readtopdfoutput.PNG')
+![](assets/part3readtopdfoutput.PNG)
 
 Next, we create the `estimate_transition_parameters` function. <br/>
 Using the training dataframe passed to us, we group the rows in the dataframe by the tags again and count the number of tags in the dataframe. <br/>
@@ -91,10 +93,12 @@ Lastly, we drop columns that we do not require, sort the values and return the d
 <br/>
 
 The function code is as follows: <br/>
-![]('assets/part3estimatetransmissionparameters.PNG')
+
+![](assets/part3estimatetransitionparameters.PNG)
 <br/>
+
 The output is: <br/>
-![]('assets/part3estimatetransmissionparametersoutput.PNG')
+![](assets/part3estimatetransitionparametersoutput.PNG)
 
 
 
@@ -205,4 +209,61 @@ At this stage, we have a completed (n, t, 7) ndarray of Node() objects. We use t
 Using the 7th best score from the last layer, we implement a simple backtrack to get the tags of each node's parent. We append the tag of last node's parent (already stored in the node from previous iteration of modified viterbi) to a path. We then find this node's parent and do to same by inserting its tag at the front of this path. This is done from layer n+1 to layer 1, and the 7th best path is generated. 
 
 ### 2.3.3 Results
+
+## 2.5
+
+For the design challenge, we tried two different approaches: Structured Perceptron Algorithm and Average Perceptron Algorithm. 
+### 2.5.1 Structured Perceptron
+We created a `StructuredPerceptron` class where we initialised a weights of type dictionary, the number of iterations to run through the sentences for, as well as training data, the output file path and all the possible tags from the training data. <br/>
+![](assets/part5structuredperceptroninit.PNG)
+
+The `StructuredPerceptron` class has `train`, `predict`, `updateweights` and `get_structured_perceptron_path` (our version of Viterbi) functions. 
+We will explain the functions in the following sections. <br/>
+
+
+The <b>training</b> algorithm for the structured perceptron that we implemented is as follows:
+1. For every sentence, run our version of Viterbi with the weights as  input. 
+2. Get the feature vector of the predictions, as well as the feature vector of the actual sentence. 
+    - The feature vector contains both the tag transitions and emission values. 
+3. Update the weights.
+4. Run through steps 1-3 for a pre-determined number of iterations.
+The code for the function is below:
+![](assets/part5trainpt1.PNG)
+![](assets/part5trainpt2.PNG)
+ 
+
+The <b>update of weights</b> algorithm: 
+1. Iterate through the feature vector of the actual sentence and do the following:
+    - If the tag was also in the feature vector of the predicted sentence, then we take value = the counts of the tag in the actual feature vector - counts of the tag in the predicted feature vector
+    - If not, then value = count of the tag in the actual feature vector
+    - We take the value variable and add it to the tag's weight.
+2. We then iterate through the feature vector of the tag sentence and update the weights of any tags that were not in the actual tag sentence.
+    - We check if the tag is in actual feature vector, and if it is, we continue on to the next tag so that we do not update the weights again.
+    - If it is not, update the weight of the tag to be the weight - count of tag in predict feature vector. 
+<br/>  
+
+The code for the function is below:
+![](assets/part5updateweights.PNG)
+
+The <b>Viterbi</b> algorithm for the structured perceptron is as follows:
+
+
+The code is as follows:
+![](assets/part5getstructuredperceptronpath.PNG)
+
+
+The prediction algorithm is:
+1. Run the viterbi algorithm with the latest training weights for each sentence in the test set, and get a list of predicted sentences. 
+2. Write each predicted sentence to a file. 
+
+The code is as follows:
+![](assets/part5predict.PNG)
+
+The limitations of our implementation are: 
+- We did not implement this for trigrams, only for bigrams, thus the accuracy is acceptable, but lower than Viterbi. <br/>
+- We did not average the weights
+
+We will address these implementations in our next implementation, averaged perceptron.
+
+### 2.5.2 Average Perceptron
 
