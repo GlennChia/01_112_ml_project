@@ -312,7 +312,10 @@ if __name__ == '__main__':
                     f.write(word + " " + tag + "\n")
                 f.write("\n")
         f.close()
+
+    # TO RUN THE CODE FOR PART 5a
     run_predictions('EN', 'dev')
     run_predictions('AL', 'dev')
-    # run_predictions('EN', 'test')
-    # run_predictions('AL', 'test')
+    # TO RUN THE CODE FOR PART 5b
+    run_predictions('EN', 'test')
+    run_predictions('AL', 'test')
